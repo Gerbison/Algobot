@@ -1,0 +1,456 @@
+/*
+ * estilo.css — visual da interface.
+ *
+ * Pensado para 1366x768: cabeçalho baixo, tabuleiro à esquerda e a área de
+ * programação numa coluna fixa à direita, sem precisar rolar a página.
+ * Os slots e os botões são propositalmente grandes: em PC de escola o mouse
+ * costuma ser ruim e o aluno precisa acertar o alvo de primeira.
+ */
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #0b111b;
+  color: #e6ecf5;
+  font-family: "Segoe UI", Roboto, system-ui, sans-serif;
+  font-size: 15px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ----------------------------------------------------------- cabeçalho -- */
+
+#cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 18px;
+  background: linear-gradient(180deg, #16243a, #101a29);
+  border-bottom: 1px solid #24354f;
+  flex: 0 0 auto;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.marca-icone {
+  color: #e63946;
+  transform: rotate(90deg);
+  display: inline-block;
+}
+
+.fase-info {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex: 1;
+}
+
+#rotulo-fase {
+  font-weight: 700;
+  color: #8fb3dd;
+}
+
+#nome-fase {
+  font-size: 17px;
+}
+
+.selo {
+  background: #24405f;
+  color: #a8dadc;
+  border: 1px solid #37608c;
+  border-radius: 999px;
+  padding: 2px 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cabecalho-acoes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nome-aluno {
+  color: #8fb3dd;
+  font-size: 13px;
+}
+
+/* --------------------------------------------------------------- palco -- */
+
+#palco {
+  flex: 1;
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  min-height: 0;
+}
+
+#coluna-tabuleiro {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+#caixa-canvas {
+  flex: 1;
+  background: #0f1622;
+  border: 1px solid #24354f;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+#tabuleiro {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.mensagem {
+  min-height: 42px;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: #16243a;
+  border: 1px solid #24354f;
+  color: #b9c9dd;
+  display: flex;
+  align-items: center;
+}
+
+.mensagem.erro {
+  background: #3a1620;
+  border-color: #8b2437;
+  color: #ffc9d1;
+}
+
+.mensagem.sucesso {
+  background: #143122;
+  border-color: #2c7a4b;
+  color: #b8f0cd;
+}
+
+/* ---------------------------------------------------------- programação -- */
+
+#coluna-programa {
+  flex: 0 0 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.bloco {
+  background: #16243a;
+  border: 1px solid #24354f;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.bloco-titulo {
+  margin: 0 0 6px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #8fb3dd;
+}
+
+.ajuda {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #7f93ad;
+}
+
+.paleta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ------------------------------------------------------------- comandos -- */
+
+.comando {
+  width: 74px;
+  height: 56px;
+  border: 1px solid #3d6390;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #2f5480, #21395a);
+  color: #eaf2ff;
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-family: inherit;
+  user-select: none;
+}
+
+.comando:hover { border-color: #6fa8e0; }
+.comando:active { cursor: grabbing; }
+
+.comando .icone { font-size: 20px; line-height: 1; }
+.comando .rotulo { font-size: 10px; letter-spacing: 0.3px; }
+
+.comando.selecionado {
+  outline: 2px solid #ffd447;
+  outline-offset: 1px;
+}
+
+/* Comandos de sub-rotina ganham cor própria para o aluno enxergar o reuso. */
+.comando[data-comando="F1"] { background: linear-gradient(180deg, #6a4b8f, #4a3466); border-color: #8f6cbd; }
+.comando[data-comando="F2"] { background: linear-gradient(180deg, #2f7d70, #1f544c); border-color: #4fb3a1; }
+.comando[data-comando="ACENDER"] { background: linear-gradient(180deg, #a37f18, #6d5410); border-color: #d8b23c; }
+
+/* ---------------------------------------------------------------- áreas -- */
+
+.area {
+  background: #16243a;
+  border: 1px solid #24354f;
+  border-radius: 10px;
+  padding: 8px 12px 12px;
+}
+
+.area.ativa {
+  border-color: #ffd447;
+  box-shadow: 0 0 0 1px rgba(255, 212, 71, 0.25);
+}
+
+.area-cabecalho {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.area-nome {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #8fb3dd;
+}
+
+.area-nome.f1 { color: #b795e0; }
+.area-nome.f2 { color: #6fd3c0; }
+
+.area-contagem { font-size: 11px; color: #7f93ad; }
+
+.slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.slot {
+  width: 52px;
+  height: 44px;
+  border: 1px dashed #3a5375;
+  border-radius: 7px;
+  background: #101a29;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  color: #eaf2ff;
+  user-select: none;
+}
+
+.slot.sobrevoo { border-color: #ffd447; background: #1d2a3f; }
+
+.slot.cheio {
+  border-style: solid;
+  border-color: #3d6390;
+  background: linear-gradient(180deg, #2f5480, #21395a);
+}
+
+.slot.cheio[data-comando="F1"] { background: linear-gradient(180deg, #6a4b8f, #4a3466); border-color: #8f6cbd; }
+.slot.cheio[data-comando="F2"] { background: linear-gradient(180deg, #2f7d70, #1f544c); border-color: #4fb3a1; }
+.slot.cheio[data-comando="ACENDER"] { background: linear-gradient(180deg, #a37f18, #6d5410); border-color: #d8b23c; }
+
+.slot .mini-rotulo { font-size: 9px; color: #cfe0f5; }
+
+/* Comando sendo executado agora. */
+.slot.executando {
+  outline: 3px solid #ffd447;
+  outline-offset: 1px;
+}
+
+/* Comando que falhou. */
+.slot.falhou {
+  outline: 3px solid #ff5470;
+  outline-offset: 1px;
+  animation: tremer 0.35s;
+}
+
+@keyframes tremer {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+/* ----------------------------------------------------------- controles -- */
+
+.bloco-controles { display: flex; flex-direction: column; gap: 8px; }
+
+.linha-controles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.botao {
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 1px solid #3d6390;
+  background: #21395a;
+  color: #eaf2ff;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.botao:hover:not(:disabled) { background: #2b4a73; }
+.botao:disabled { opacity: 0.45; cursor: default; }
+
+.botao-primario {
+  background: #2c7a4b;
+  border-color: #3fa267;
+  font-weight: 600;
+}
+.botao-primario:hover:not(:disabled) { background: #35915a; }
+
+.botao-claro { background: #24354f; }
+.botao-perigo { background: #6d2233; border-color: #a13349; }
+
+.seletor {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #3d6390;
+  background: #101a29;
+  color: #eaf2ff;
+  font-family: inherit;
+}
+
+.rotulo-pequeno { font-size: 12px; color: #7f93ad; }
+
+.contador { font-size: 12px; color: #7f93ad; }
+
+/* -------------------------------------------------------------- janelas -- */
+
+.cortina {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 10, 17, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.oculto { display: none !important; }
+
+.janela {
+  background: #16243a;
+  border: 1px solid #37608c;
+  border-radius: 12px;
+  padding: 22px 26px;
+  width: min(560px, 92vw);
+  max-height: 86vh;
+  overflow-y: auto;
+}
+
+.janela h2 { margin: 0 0 10px; font-size: 20px; }
+.janela p { color: #b9c9dd; line-height: 1.5; }
+
+.janela-acoes {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.campo {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 8px;
+  border: 1px solid #3d6390;
+  background: #101a29;
+  color: #eaf2ff;
+  font-size: 16px;
+  font-family: inherit;
+}
+
+.destaque { color: #ffd447; }
+
+.codigo {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 26px;
+  letter-spacing: 3px;
+  text-align: center;
+  color: #ffd447;
+  background: #101a29;
+  border: 1px dashed #3d6390;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 12px;
+  word-break: break-all;
+}
+
+.estrelas-grandes {
+  font-size: 46px;
+  text-align: center;
+  color: #ffd447;
+  letter-spacing: 8px;
+}
+
+/* --------------------------------------------------------- lista fases -- */
+
+.lista-fases {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.cartao-fase {
+  border: 1px solid #3d6390;
+  border-radius: 9px;
+  background: #1b2c45;
+  color: #eaf2ff;
+  padding: 10px 8px;
+  cursor: pointer;
+  text-align: center;
+  font-family: inherit;
+}
+
+.cartao-fase:hover:not(:disabled) { background: #24405f; }
+
+.cartao-fase:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.cartao-fase .numero { font-size: 18px; font-weight: 700; }
+.cartao-fase .titulo { font-size: 11px; color: #b9c9dd; display: block; margin: 2px 0 4px; }
+.cartao-fase .estrelas { color: #ffd447; font-size: 13px; letter-spacing: 2px; }

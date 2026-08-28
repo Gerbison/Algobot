@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AlgoBot</title>
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+<header id="cabecalho">
+  <div class="marca">
+    <span class="marca-icone">▲</span>
+    <span id="titulo-jogo">AlgoBot</span>
+  </div>
+
+  <div class="fase-info">
+    <span id="rotulo-fase">Fase 1</span>
+    <span id="nome-fase">—</span>
+    <span id="selo-conceito" class="selo">Conceito: —</span>
+  </div>
+
+  <div class="cabecalho-acoes">
+    <span id="nome-aluno" class="nome-aluno"></span>
+    <button id="btn-fases" class="botao botao-claro">Fases</button>
+    <button id="btn-codigo" class="botao botao-claro">Meu código</button>
+  </div>
+</header>
+
+<main id="palco">
+
+  <section id="coluna-tabuleiro">
+    <div id="caixa-canvas">
+      <canvas id="tabuleiro" width="820" height="520"></canvas>
+    </div>
+    <div id="mensagem" class="mensagem"></div>
+  </section>
+
+  <section id="coluna-programa">
+
+    <div class="bloco">
+      <h2 class="bloco-titulo">Comandos</h2>
+      <p class="ajuda">Arraste para um espaço, ou clique para colocar na área destacada.</p>
+      <div id="paleta" class="paleta"></div>
+    </div>
+
+    <div id="areas"></div>
+
+    <div class="bloco bloco-controles">
+      <div class="linha-controles">
+        <button id="btn-executar" class="botao botao-primario">▶ Executar</button>
+        <button id="btn-parar" class="botao" disabled>■ Parar</button>
+        <button id="btn-limpar" class="botao">Limpar</button>
+      </div>
+      <div class="linha-controles">
+        <label for="velocidade" class="rotulo-pequeno">Velocidade</label>
+        <select id="velocidade" class="seletor">
+          <option value="lento">Lento</option>
+          <option value="normal" selected>Normal</option>
+          <option value="rapido">Rápido</option>
+        </select>
+        <button id="btn-dica" class="botao botao-claro">Dica</button>
+      </div>
+      <div id="contador" class="contador">0 comandos usados</div>
+    </div>
+
+  </section>
+</main>
+
+<!-- ------------------------------------------------------------------ -->
+<!-- Janelas sobrepostas. Ficam escondidas até o JavaScript abrir.        -->
+<!-- ------------------------------------------------------------------ -->
+
+<div id="cortina" class="cortina oculto">
+
+  <div id="janela-nome" class="janela oculto">
+    <h2>Bem-vindo ao <span class="destaque" id="nome-jogo-boas-vindas">AlgoBot</span></h2>
+    <p>Digite seu nome ou apelido. Ele fica guardado só neste computador.</p>
+    <input id="campo-nome" class="campo" maxlength="24" placeholder="Seu nome">
+    <div class="janela-acoes">
+      <button id="btn-confirmar-nome" class="botao botao-primario">Começar</button>
+    </div>
+  </div>
+
+  <div id="janela-fases" class="janela oculto">
+    <h2>Escolha a fase</h2>
+    <div id="lista-fases" class="lista-fases"></div>
+    <div class="janela-acoes">
+      <button id="btn-apagar-progresso" class="botao botao-perigo">Apagar meu progresso</button>
+      <button class="botao fechar-janela">Fechar</button>
+    </div>
+  </div>
+
+  <div id="janela-vitoria" class="janela oculto">
+    <h2>Fase concluída!</h2>
+    <div id="estrelas-vitoria" class="estrelas-grandes"></div>
+    <p id="texto-vitoria"></p>
+    <div class="janela-acoes">
+      <button id="btn-refazer" class="botao">Tentar com menos comandos</button>
+      <button id="btn-proxima" class="botao botao-primario">Próxima fase</button>
+    </div>
+  </div>
+
+  <div id="janela-codigo" class="janela oculto">
+    <h2>Código de conclusão</h2>
+    <p>Passe este código para o professor caso você tenha jogado sem internet.</p>
+    <div id="texto-codigo" class="codigo"></div>
+    <div class="janela-acoes">
+      <button class="botao fechar-janela">Fechar</button>
+    </div>
+  </div>
+
+  <div id="janela-dica" class="janela oculto">
+    <h2>Dica</h2>
+    <p id="texto-dica"></p>
+    <div class="janela-acoes">
+      <button class="botao fechar-janela">Entendi</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/fases.js"></script>
+<script src="js/motor.js"></script>
+<script src="js/interpretador.js"></script>
+<script src="js/estrelas.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>
