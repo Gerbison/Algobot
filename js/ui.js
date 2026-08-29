@@ -608,8 +608,13 @@
     ligarEventos();
 
     // Retoma na maior fase liberada, para o aluno não ter que procurar.
-    const alvo = FASES.findIndex(function (f) { return f.id === progresso.faseMaxima; });
-    carregarFase(alvo >= 0 ? alvo : 0);
+    // Quem já terminou tudo (faseMaxima passa do último id) volta na última
+    // fase, e não na primeira.
+    let alvo = FASES.findIndex(function (f) { return f.id === progresso.faseMaxima; });
+    if (alvo < 0) {
+      alvo = progresso.faseMaxima > 1 ? FASES.length - 1 : 0;
+    }
+    carregarFase(alvo);
 
     lacoDeDesenho();
 
