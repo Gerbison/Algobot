@@ -404,8 +404,65 @@
     $("btn-proxima").textContent =
       indiceFase >= FASES.length - 1 ? "Você terminou tudo!" : "Próxima fase";
 
+    montarRevisao();
+
     mensagem("Fase concluída!", "sucesso");
     abrirJanela("janela-vitoria");
+  }
+
+  /* --------------------------------------------- revisão em TypeScript -- */
+
+  /* Escapa o que vira HTML. O código é gerado por nós, mas escapar é barato
+   * e evita que um comando novo com "<" no nome quebre a página um dia. */
+  function escapar(texto) {
+    return texto
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  /* Realce de sintaxe bem simples, suficiente para ler no projetor.
+   * Linha de comentário é tratada inteira; nas outras, destacamos as palavras
+   * reservadas, os números e os nomes seguidos de parêntese. */
+  function realcar(codigo) {
+    return escapar(codigo).split("\n").map(function (linha) {
+      if (linha.trim().indexOf("//") === 0) {
+        return '<span class="ts-comentario">' + linha + "</span>";
+      }
+      return linha
+        .replace(/\b(function|void|for|while|let|const|return|true|false)\b/g,
+                 '<span class="ts-palavra">$1</span>')
+        .replace(/\b(\d+)\b/g, '<span class="ts-numero">$1</span>')
+        .replace(/\b([a-zA-Z][a-zA-Z0-9]*)\(/g, '<span class="ts-funcao">$1</span>(');
+    }).join("\n");
+  }
+
+  function montarRevisao() {
+    const analise = Codigo.analisar(programa);
+
+    $("explicacao-codigo").textContent = analise.explicacao;
+    $("codigo-ts").innerHTML = realcar(Codigo.gerarTypeScript(programa));
+
+    const bloco = $("bloco-alternativa");
+
+    // Sem alternativa e sem texto: some com a seção inteira.
+    if (!analise.codigoAlternativa && !analise.textoAlternativa) {
+      bloco.classList.add("oculto");
+      return;
+    }
+
+    bloco.classList.remove("oculto");
+    $("titulo-alternativa").textContent = analise.tituloAlternativa || "Sobre simplificar";
+    $("titulo-alternativa").classList.toggle("oculto", !analise.tituloAlternativa);
+    $("texto-alternativa").textContent = analise.textoAlternativa || "";
+
+    const alvo = $("codigo-alternativa");
+    if (analise.codigoAlternativa) {
+      alvo.innerHTML = realcar(analise.codigoAlternativa);
+      alvo.classList.remove("oculto");
+    } else {
+      alvo.classList.add("oculto");
+    }
   }
 
   /* -------------------------------------------------------- animação --- */

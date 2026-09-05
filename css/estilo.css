@@ -462,6 +462,63 @@ body {
   letter-spacing: 8px;
 }
 
+/* ------------------------------------------------- revisão da fase (TS) -- */
+
+.revisao {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #2a4363;
+}
+
+.revisao-titulo {
+  margin: 16px 0 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #8fb3dd;
+}
+
+.revisao-titulo:first-child { margin-top: 0; }
+
+.revisao p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* A tela de vitória cresceu com a revisão em TypeScript e passou a rolar por
+ * dentro. Sem isto, o botão "Próxima fase" fica abaixo da dobra e o aluno
+ * precisa descobrir que tem que rolar. Grudado no rodapé, está sempre à mão.
+ * O -22px cancela o padding inferior da janela, para encostar na borda. */
+#janela-vitoria .janela-acoes {
+  position: sticky;
+  bottom: -22px;
+  background: #16243a;
+  border-top: 1px solid #2a4363;
+  margin-top: 16px;
+  padding: 14px 0 8px;
+}
+
+.codigo-ts {
+  margin: 8px 0 0;
+  padding: 12px 14px;
+  background: #0d1521;
+  border: 1px solid #26374f;
+  border-radius: 8px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #dbe6f5;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* Cores do realce de sintaxe, aplicado em ui.js. */
+.ts-palavra { color: #6fa8e0; }      /* function, void, for, while, let */
+.ts-funcao { color: #ffd447; }       /* nomes de função */
+.ts-comentario { color: #6d819b; font-style: italic; }
+.ts-numero { color: #6fd3c0; }
+
 /* --------------------------------------------------------- lista fases -- */
 
 .lista-fases {

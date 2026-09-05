@@ -21,7 +21,7 @@ const assert = require("assert");
 // Os arquivos do jogo usam <script> clássico (sem module.exports), então
 // carregamos todos num contexto compartilhado, exatamente como o navegador faz.
 const contexto = vm.createContext({ console: console, performance: { now: Date.now } });
-["config.js", "fases.js", "motor.js", "interpretador.js", "estrelas.js"].forEach(function (arquivo) {
+["config.js", "fases.js", "motor.js", "interpretador.js", "estrelas.js", "codigo.js"].forEach(function (arquivo) {
   const caminho = path.join(__dirname, "..", "js", arquivo);
   vm.runInContext(fs.readFileSync(caminho, "utf8"), contexto, { filename: arquivo });
 });
@@ -38,6 +38,7 @@ const FASES = doContexto("FASES");
 const Motor = doContexto("Motor");
 const Interpretador = doContexto("Interpretador");
 const Estrelas = doContexto("Estrelas");
+const Codigo = doContexto("Codigo");
 
 const A = "AVANCAR";
 const E = "GIRAR_ESQ";
@@ -196,6 +197,80 @@ try {
   falhas++;
   console.error("  FALHA " + erro.message);
 }
+
+/* --------------------------------------------------------------------------
+ * Revisão em TypeScript: o texto e o código mostrados ao concluir a fase.
+ * ------------------------------------------------------------------------ */
+
+function testarCodigo(titulo, fn) {
+  try {
+    fn();
+    console.log("  ok   " + titulo);
+  } catch (erro) {
+    falhas++;
+    console.error("  FALHA " + titulo + ": " + erro.message);
+  }
+}
+
+testarCodigo("sequência direta não inventa alternativa", function () {
+  const analise = Codigo.analisar({ principal: [A, A, L], f1: [], f2: [] });
+  assert.ok(/sequência direta/.test(analise.explicacao), "deveria falar em sequência direta");
+  assert.strictEqual(analise.codigoAlternativa, null, "não há o que simplificar aqui");
+});
+
+testarCodigo("F1 chamada N vezes vira sugestão de for", function () {
+  const analise = Codigo.analisar({ principal: ["F1", "F1", "F1"], f1: [A, A, L], f2: [] });
+  assert.ok(/função/.test(analise.explicacao), "deveria explicar o conceito de função");
+  assert.ok(/for \(let i = 0; i < 3; i\+\+\)/.test(analise.codigoAlternativa),
+    "o for deveria repetir 3 vezes; veio: " + analise.codigoAlternativa);
+  assert.ok(/f1\(\);/.test(analise.codigoAlternativa), "o corpo do for deveria chamar f1()");
+});
+
+testarCodigo("repetição na mão sugere extrair função + for", function () {
+  const analise = Codigo.analisar({ principal: [A, A, L, A, A, L, A, A, L], f1: [], f2: [] });
+  assert.ok(/três vezes/.test(analise.explicacao), "deveria dizer que o trecho aparece três vezes");
+  assert.ok(/function trecho\(\): void/.test(analise.codigoAlternativa), "deveria propor extrair uma função");
+  assert.ok(/i < 3;/.test(analise.codigoAlternativa), "o for deveria ser de 3 voltas");
+});
+
+testarCodigo("recursão é explicada e vira while", function () {
+  const analise = Codigo.analisar({ principal: ["F1"], f1: [A, L, "F1"], f2: [] });
+  assert.ok(/recursão/.test(analise.explicacao), "deveria nomear recursão");
+  assert.ok(/while \(/.test(analise.codigoAlternativa), "a alternativa deveria usar while");
+  assert.ok(!/f1\(\)/.test(analise.codigoAlternativa),
+    "o while não pode chamar f1 de novo, senão continua recursivo: " + analise.codigoAlternativa);
+});
+
+testarCodigo("TypeScript gerado tem uma função por área usada", function () {
+  const ts = Codigo.gerarTypeScript({ principal: ["F1", "F2"], f1: [A, L], f2: [P] });
+  assert.ok(/function principal\(\): void \{/.test(ts), "faltou a principal");
+  assert.ok(/function f1\(\): void \{/.test(ts), "faltou a f1");
+  assert.ok(/function f2\(\): void \{/.test(ts), "faltou a f2");
+  assert.ok(/avancar\(\);/.test(ts), "AVANCAR deveria virar avancar()");
+  assert.ok(/acender\(\);/.test(ts), "ACENDER deveria virar acender()");
+  assert.ok(/pular\(\);/.test(ts), "PULAR deveria virar pular()");
+
+  // área vazia não pode virar função vazia
+  const soPrincipal = Codigo.gerarTypeScript({ principal: [A, L], f1: [], f2: [] });
+  assert.ok(!/function f1/.test(soPrincipal), "F1 vazia não deveria aparecer no código");
+});
+
+testarCodigo("as 12 soluções geram revisão sem quebrar", function () {
+  FASES.forEach(function (fase) {
+    const s = SOLUCOES[fase.id];
+    const programa = { principal: s.principal || [], f1: s.f1 || [], f2: s.f2 || [] };
+
+    const analise = Codigo.analisar(programa);
+    assert.ok(analise.explicacao && analise.explicacao.length > 20,
+      "fase " + fase.id + ": explicação vazia ou curta demais");
+
+    const ts = Codigo.gerarTypeScript(programa);
+    assert.ok(/function principal/.test(ts), "fase " + fase.id + ": TypeScript sem principal");
+
+    // nenhum comando pode escapar sem tradução
+    assert.ok(!/undefined/.test(ts), "fase " + fase.id + ": comando sem tradução no TypeScript");
+  });
+});
 
 console.log("");
 if (falhas > 0) {

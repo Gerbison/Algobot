@@ -35,6 +35,7 @@ js/fases.js         as 12 fases  ← é aqui que o professor mexe
 js/motor.js         as regras do jogo (mover, girar, pular, acender)
 js/interpretador.js decide qual comando vem a seguir; pilha de chamadas F1/F2
 js/estrelas.js      pontuação e código de conclusão
+js/codigo.js        traduz a solução para TypeScript e comenta o que o aluno fez
 js/storage.js       fachada de persistência (hoje só localStorage)
 js/render.js        desenho isométrico no Canvas
 js/ui.js            a cola: DOM, arrastar/clicar, execução animada, janelas
@@ -148,6 +149,36 @@ LESTE/OESTE do tabuleiro; nenhum comando muda de efeito porque a vista girou.
 O visor do robô gira junto com a câmera — o vetor da direção é girado pelo
 mesmo θ antes de ser projetado —, então o que o aluno vê continua batendo com
 o que vai acontecer.
+
+### 4. A revisão em TypeScript
+
+Ao vencer, `codigo.js` traduz a solução do aluno para TypeScript e escreve uma
+frase sobre o que ele fez. A análise é deliberadamente rasa — quatro casos, na
+ordem em que são testados:
+
+1. **alguma sub-rotina chama a si mesma** → é recursão; a alternativa mostra o
+   mesmo laço escrito com `while`;
+2. **a PRINCIPAL é um bloco repetido do início ao fim** → vira um `for`. Se o
+   bloco repetido já for uma chamada de sub-rotina, só falta o laço; se o aluno
+   repetiu os comandos na mão, a sugestão extrai uma função **e** usa o laço;
+3. **usou sub-rotina, sem repetição exata** → explica o que é uma função, sem
+   sugerir alternativa;
+4. **sequência direta** → diz que não há o que encurtar.
+
+Duas decisões que valem registrar:
+
+- **Só a repetição que cobre a lista inteira conta** (`Codigo.repeticao`).
+  Repetição parcial existiria em quase todo programa e a sugestão viraria
+  ruído. Melhor não sugerir nada do que sugerir algo confuso.
+- **A alternativa fala de como escrever, nunca de qual é a resposta.** A graça
+  do jogo é o aluno achar o caminho; o que este arquivo ensina é a forma de
+  expressar o caminho em código. Se algum dia alguém quiser mostrar a solução
+  ótima aqui, saiba que isso mata o valor pedagógico das fases 5 e 6.
+
+`codigo.js` não conhece o motor nem o DOM: recebe o programa, devolve texto.
+Por isso os quatro casos são testados no Node, sem navegador. O realce de
+sintaxe (que é HTML) mora em `ui.js`, junto com o escape — o gerador continua
+produzindo texto puro.
 
 ## O código de conclusão
 

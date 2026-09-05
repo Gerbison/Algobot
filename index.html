@@ -105,6 +105,23 @@
     <h2>Fase concluída!</h2>
     <div id="estrelas-vitoria" class="estrelas-grandes"></div>
     <p id="texto-vitoria"></p>
+
+    <!-- Retorno da fase: o que o aluno fez, o mesmo em TypeScript, e
+         quando existe, um jeito mais simples de escrever a mesma coisa. -->
+    <div class="revisao">
+      <h3 class="revisao-titulo">O que você acabou de fazer</h3>
+      <p id="explicacao-codigo"></p>
+
+      <h3 class="revisao-titulo">A sua solução em TypeScript</h3>
+      <pre id="codigo-ts" class="codigo-ts"></pre>
+
+      <div id="bloco-alternativa">
+        <h3 class="revisao-titulo" id="titulo-alternativa"></h3>
+        <p id="texto-alternativa"></p>
+        <pre id="codigo-alternativa" class="codigo-ts"></pre>
+      </div>
+    </div>
+
     <div class="janela-acoes">
       <button id="btn-refazer" class="botao">Tentar com menos comandos</button>
       <button id="btn-proxima" class="botao botao-primario">Próxima fase</button>
@@ -135,6 +152,7 @@
 <script src="js/motor.js"></script>
 <script src="js/interpretador.js"></script>
 <script src="js/estrelas.js"></script>
+<script src="js/codigo.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/render.js"></script>
 <script src="js/ui.js"></script>

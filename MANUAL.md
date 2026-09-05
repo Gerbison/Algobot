@@ -44,6 +44,28 @@ com a tela, então o que se vê continua batendo com o que acontece.
 
 `F1` e `F2` podem chamar a si mesmas. É assim que se faz um laço.
 
+### A revisão em TypeScript
+
+Ao concluir uma fase, junto com as estrelas aparece um retorno em três partes:
+
+1. **O que você acabou de fazer** — uma frase nomeando, em termos de
+   programação, o que a solução do aluno é: uma sequência direta, uma função,
+   ou uma recursão.
+2. **A sua solução em TypeScript** — os comandos do tabuleiro traduzidos em
+   código de verdade. `AVANÇAR` vira `avancar()`, a área F1 vira
+   `function f1(): void { ... }`, e assim por diante.
+3. **Um jeito mais simples** — quando existe. Chamar `f1()` quatro vezes seguidas
+   vira um `for`; uma F1 que chama a si mesma vira um `while`.
+
+Esse terceiro bloco fala de **como escrever**, nunca de qual é a resposta da
+fase — a descoberta do caminho continua sendo do aluno. Quando não há nada a
+simplificar (uma sequência sem repetição), o jogo diz isso em vez de inventar
+uma sugestão.
+
+Para usar em aula: a mesma fase resolvida com e sem F1 mostra lado a lado a
+diferença entre repetir código e reaproveitar código — é o gancho para
+apresentar função e laço.
+
 ### Estrelas
 
 - **1 estrela** — completou.
