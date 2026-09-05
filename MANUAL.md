@@ -130,25 +130,43 @@ O nome novo aparece no título da janela, no cabeçalho e na tela de boas-vindas
 
 ## Como publicar no GitHub Pages
 
-Como não há build step, publicar é só subir os arquivos.
+**Antes de mais nada:** o Pages **não funciona em repositório privado no plano
+gratuito** do GitHub — ele exige GitHub Pro ou superior. Este projeto está hoje
+em `github.com/Gerbison/Algobot`, que é **privado**, então o código está a
+salvo no GitHub mas o link público ainda não existe.
 
-1. Crie um repositório no GitHub (pode ser público).
-2. Na pasta do projeto:
+Isso não atrapalha o jogo em si: ele abre com duplo clique no `index.html`, sem
+servidor nenhum. Publicar só passa a importar de verdade na Entrega 2, quando o
+aluno precisar de um endereço para abrir de casa.
+
+Quando chegar essa hora, há três saídas:
+
+- **tornar o repositório público** — não há nada sensível aqui: sem senha, sem
+  chave de API, sem dado de aluno. É a saída mais simples e gratuita;
+- **assinar o GitHub Pro**, mantendo tudo privado;
+- **hospedar em outro serviço** de site estático.
+
+Feita a escolha, o resto é só ligar o Pages: em **Settings → Pages**, escolha
+**Deploy from a branch**, branch `main`, pasta `/ (root)`, e salve. Em um ou
+dois minutos o jogo estará em `https://gerbison.github.io/Algobot/`.
+
+Atenção ao endereço: o GitHub diferencia maiúsculas de minúsculas na URL, e o
+repositório se chama `Algobot`, com `A` maiúsculo e `b` minúsculo.
+
+Como tudo é arquivo estático, esse link funciona igual ao duplo clique local.
+
+### Se você for criar outro repositório do zero
+
+Crie vazio no GitHub — **sem** marcar README, `.gitignore` ou licença, senão
+ele conflita com os commits que já existem aqui. Depois:
 
 ```bash
-git remote add origin https://github.com/SEU_USUARIO/algobot.git
+git remote add origin https://github.com/SEU_USUARIO/NOME_DO_REPO.git
 ```
 
 ```bash
 git push -u origin main
 ```
-
-3. No GitHub, vá em **Settings → Pages**, escolha **Deploy from a branch**,
-   branch `main`, pasta `/ (root)`, e salve.
-4. Em um ou dois minutos o jogo estará em
-   `https://SEU_USUARIO.github.io/algobot/`.
-
-Como tudo é arquivo estático, esse link funciona igual ao duplo clique local.
 
 ## Painel do professor
 
