@@ -117,7 +117,45 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 0;
+  /* âncora dos botões de câmera, que são posicionados por cima do canvas */
+  position: relative;
 }
+
+/* --------------------------------------------------- controles de câmera -- */
+
+.camera {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+}
+
+.camera-legenda {
+  position: absolute;
+  top: 54px;
+  right: 12px;
+  font-size: 11px;
+  color: #6d819b;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+}
+
+.botao-camera {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid #3d6390;
+  background: rgba(33, 57, 90, 0.85);
+  color: #eaf2ff;
+  font-size: 22px;
+  line-height: 1;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.botao-camera:hover { background: #2b4a73; border-color: #6fa8e0; }
+.botao-camera:active { background: #35618f; }
 
 #tabuleiro {
   display: block;

@@ -15,12 +15,35 @@
  * Como ALTURA_TILE é metade de LARGURA_TILE, os losangos ficam na proporção
  * 2:1, que é o visual isométrico clássico.
  *
- * ORDEM DE DESENHO: casas mais "à frente" precisam ser pintadas por cima das
- * de trás. Profundidade aqui é (x + y): quanto maior, mais na frente. Um laço
- * com y por fora e x por dentro já garante isso, porque as três casas capazes
- * de tapar a casa (x,y) — (x+1,y), (x,y+1) e (x+1,y+1) — sempre vêm depois
- * nessa ordem. O robô é desenhado no meio do laço, quando chegamos na casa
- * dele, e não no fim: assim uma casa alta na frente o esconde de verdade.
+ * ---------------------------------------------------------------------------
+ * GIRAR A CÂMERA
+ * ---------------------------------------------------------------------------
+ * O aluno pode girar o tabuleiro para enxergar o que está escondido atrás de
+ * uma casa alta. Em vez de ter quatro projeções diferentes, giramos as
+ * COORDENADAS em torno do centro do tabuleiro e depois aplicamos sempre a
+ * mesma projeção acima:
+ *
+ *     p' = centro + R(θ) · (p - centro)
+ *
+ * Duas consequências boas de fazer assim:
+ *   1. θ pode ser um valor qualquer, não só múltiplo de 90°, e o giro fica
+ *      animado de graça — basta interpolar θ;
+ *   2. como giramos em torno do centro, o tabuleiro nunca "escapa" da tela.
+ *
+ * ATENÇÃO: isto é só câmera. O motor continua raciocinando em NORTE/SUL/
+ * LESTE/OESTE do tabuleiro; girar a vista não muda uma vírgula na lógica dos
+ * comandos.
+ *
+ * ---------------------------------------------------------------------------
+ * ORDEM DE DESENHO
+ * ---------------------------------------------------------------------------
+ * Casas mais "à frente" precisam ser pintadas por cima das de trás.
+ * Profundidade aqui é (x + y) DEPOIS do giro: quanto maior, mais na frente.
+ * Como as coordenadas giradas não seguem mais a ordem das linhas da matriz,
+ * montamos a lista de tudo que vai ser desenhado (casas + robô) e ordenamos
+ * por profundidade a cada quadro. São no máximo 64 casas — ordenar isso 60
+ * vezes por segundo não custa nada, e é muito mais simples de conferir do que
+ * tentar adivinhar a ordem certa do laço para cada ângulo.
  * ---------------------------------------------------------------------------
  */
 
@@ -28,17 +51,65 @@ const Render = (function () {
 
   let canvas = null;
   let ctx = null;
+  let faseAtual = null;
 
   // Calculado uma vez por fase: quanto deslocar e reduzir para o tabuleiro
-  // caber inteiro no canvas.
+  // caber inteiro no canvas, em qualquer ângulo de câmera.
   let enquadramento = { offsetX: 0, offsetY: 0, escala: 1 };
+
+  // Ângulo da câmera, em radianos. "Alvo" é para onde o aluno mandou girar;
+  // "atual" persegue o alvo a cada quadro, produzindo a animação.
+  let anguloAtual = 0;
+  let anguloAlvo = 0;
 
   function iniciar(elementoCanvas) {
     canvas = elementoCanvas;
     ctx = canvas.getContext("2d");
   }
 
-  /* Converte coordenada de jogo em pixel, antes do enquadramento. */
+  /* ------------------------------------------------------------- câmera -- */
+
+  /* passos = +1 gira um quarto de volta no sentido horário, -1 anti-horário. */
+  function girar(passos) {
+    anguloAlvo += passos * (Math.PI / 2);
+  }
+
+  function reiniciarCamera() {
+    anguloAtual = 0;
+    anguloAlvo = 0;
+  }
+
+  /* Quantos quartos de volta a câmera já deu (0 a 3), para quem precisar
+   * saber a orientação — por exemplo, para girar junto o visor do robô. */
+  function quartosDeVolta() {
+    const q = Math.round(anguloAtual / (Math.PI / 2)) % 4;
+    return (q + 4) % 4;
+  }
+
+  /* Centro do tabuleiro em coordenadas de jogo. É em torno dele que giramos. */
+  function centroDaGrade(fase) {
+    let largura = 0;
+    fase.grade.forEach(function (linha) {
+      largura = Math.max(largura, linha.length);
+    });
+    return { x: (largura - 1) / 2, y: (fase.grade.length - 1) / 2 };
+  }
+
+  /* Aplica o giro da câmera a uma coordenada de jogo. Aceita valores
+   * fracionários — é assim que o robô é animado entre duas casas. */
+  function girarCoord(x, y, angulo, centro) {
+    const dx = x - centro.x;
+    const dy = y - centro.y;
+    const cos = Math.cos(angulo);
+    const sen = Math.sin(angulo);
+    return {
+      x: centro.x + dx * cos - dy * sen,
+      y: centro.y + dx * sen + dy * cos
+    };
+  }
+
+  /* ---------------------------------------------------------- projeção -- */
+
   function paraTela(x, y, altura) {
     return {
       x: (x - y) * (LARGURA_TILE / 2),
@@ -47,27 +118,37 @@ const Render = (function () {
   }
 
   /*
-   * Mede o tabuleiro inteiro e descobre o deslocamento e a escala que fazem
-   * ele caber no canvas com uma margem. Chamar sempre que a fase mudar ou a
-   * janela for redimensionada.
+   * Mede o tabuleiro e descobre deslocamento e escala para ele caber no canvas.
+   *
+   * Medimos a UNIÃO das quatro orientações, não só a atual. Se medíssemos só a
+   * atual, um tabuleiro não quadrado mudaria de escala no meio do giro e a
+   * imagem ficaria "respirando". Assim ele fica parado, e só gira.
    */
   function enquadrar(fase) {
+    faseAtual = fase;
+    const centro = centroDaGrade(fase);
+
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
 
-    for (let y = 0; y < fase.grade.length; y++) {
-      for (let x = 0; x < fase.grade[y].length; x++) {
-        const alt = fase.grade[y][x];
-        if (!alt) continue;
+    for (let volta = 0; volta < 4; volta++) {
+      const angulo = volta * (Math.PI / 2);
 
-        const topo = paraTela(x, y, alt);
-        const base = paraTela(x, y, 0);
+      for (let y = 0; y < fase.grade.length; y++) {
+        for (let x = 0; x < fase.grade[y].length; x++) {
+          const alt = fase.grade[y][x];
+          if (!alt) continue;
 
-        minX = Math.min(minX, topo.x - LARGURA_TILE / 2);
-        maxX = Math.max(maxX, topo.x + LARGURA_TILE / 2);
-        // O ponto mais alto é o vértice de cima do losango do topo...
-        minY = Math.min(minY, topo.y - ALTURA_TILE / 2 - 34); // 34 = folga p/ o robô
-        // ...e o mais baixo é o pé da coluna, no nível do chão.
-        maxY = Math.max(maxY, base.y + ALTURA_TILE / 2 + 8);
+          const g = girarCoord(x, y, angulo, centro);
+          const topo = paraTela(g.x, g.y, alt);
+          const base = paraTela(g.x, g.y, 0);
+
+          minX = Math.min(minX, topo.x - LARGURA_TILE / 2);
+          maxX = Math.max(maxX, topo.x + LARGURA_TILE / 2);
+          // O ponto mais alto é o vértice de cima do losango, com folga para o robô...
+          minY = Math.min(minY, topo.y - ALTURA_TILE / 2 - 34);
+          // ...e o mais baixo é o pé da coluna, no nível do chão.
+          maxY = Math.max(maxY, base.y + ALTURA_TILE / 2 + 8);
+        }
       }
     }
 
@@ -95,6 +176,8 @@ const Render = (function () {
     };
   }
 
+  /* ----------------------------------------------------------- desenho -- */
+
   function poligono(pontos, preenchimento, contorno) {
     ctx.beginPath();
     ctx.moveTo(pontos[0].x, pontos[0].y);
@@ -113,13 +196,13 @@ const Render = (function () {
     }
   }
 
-  /* Desenha uma casa: o losango do topo mais as duas faces laterais visíveis. */
-  function desenharCasa(estado, x, y, tempo) {
+  /* Desenha uma casa: o losango do topo mais as duas faces laterais visíveis.
+   * "girada" já vem com o giro da câmera aplicado. */
+  function desenharCasa(estado, x, y, girada, tempo) {
     const alt = estado.fase.grade[y][x];
-    if (!alt) return;
 
     const e = enquadramento.escala;
-    const centro = aplicarEnquadramento(paraTela(x, y, alt));
+    const centro = aplicarEnquadramento(paraTela(girada.x, girada.y, alt));
     const meiaL = (LARGURA_TILE / 2) * e;
     const meiaA = (ALTURA_TILE / 2) * e;
     // Altura da coluna na tela: os níveis de altura mais uma saia fixa, para
@@ -183,13 +266,12 @@ const Render = (function () {
   }
 
   /*
-   * Desenha o robô. visual.x/visual.y são frações (ex.: 2.4) durante a
-   * animação de movimento; visual.altura idem, para a subida do PULAR.
-   * visual.giro é o índice da direção, também fracionário durante o giro.
+   * Desenha o robô. "girada" é a posição dele já com o giro da câmera;
+   * visual.altura pode ser fracionária durante o pulo.
    */
-  function desenharRobo(visual, tempo) {
+  function desenharRobo(visual, girada, angulo, tempo) {
     const e = enquadramento.escala;
-    const base = aplicarEnquadramento(paraTela(visual.x, visual.y, visual.altura));
+    const base = aplicarEnquadramento(paraTela(girada.x, girada.y, visual.altura));
 
     const corpoL = 20 * e;
     const corpoA = 26 * e;
@@ -228,18 +310,18 @@ const Render = (function () {
     ctx.arc(base.x, cy - corpoA * 0.82, 3 * e, 0, Math.PI * 2);
     ctx.fill();
 
-    /* Visor: fica no lado para onde o robô olha. Cada direção tem um
-     * deslocamento isométrico próprio — é o mesmo (x-y, x+y) das casas,
-     * aplicado ao vetor unitário da direção. */
-    const anguloIso = {
-      NORTE: { dx: 1, dy: -1 },
-      LESTE: { dx: 1, dy: 1 },
-      SUL: { dx: -1, dy: 1 },
-      OESTE: { dx: -1, dy: -1 }
-    }[visual.direcao];
+    /* Visor: fica no lado para onde o robô olha.
+     * Pegamos o vetor da direção em coordenadas de jogo, giramos ele pelo
+     * mesmo ângulo da câmera e projetamos. Assim o visor acompanha o giro
+     * de forma contínua, sem depender de uma tabela por orientação. */
+    const v = VETOR_DIRECAO[visual.direcao];
+    const cos = Math.cos(angulo);
+    const sen = Math.sin(angulo);
+    const gdx = v.dx * cos - v.dy * sen;
+    const gdy = v.dx * sen + v.dy * cos;
 
-    const vx = base.x + anguloIso.dx * corpoL * 0.34;
-    const vy = cy + anguloIso.dy * corpoA * 0.20;
+    const vx = base.x + (gdx - gdy) * corpoL * 0.34;
+    const vy = cy + (gdx + gdy) * corpoA * 0.20;
 
     ctx.fillStyle = CORES.roboVisor;
     ctx.beginPath();
@@ -255,35 +337,62 @@ const Render = (function () {
   function desenhar(estado, visual) {
     const tempo = performance.now();
 
+    // A câmera persegue o ângulo alvo. O fator 0.18 é o quanto ela fecha a
+    // distância por quadro: dá um giro de cerca de meio segundo, rápido o
+    // bastante para não cansar e lento o bastante para o aluno acompanhar
+    // que lado virou para onde.
+    const resto = anguloAlvo - anguloAtual;
+    if (Math.abs(resto) < 0.001) {
+      anguloAtual = anguloAlvo;
+    } else {
+      anguloAtual += resto * 0.18;
+    }
+
     ctx.fillStyle = CORES.fundo;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const grade = estado.fase.grade;
-    // A casa em que o robô "está" para efeito de ordem de desenho.
-    const roboX = Math.round(visual.x);
-    const roboY = Math.round(visual.y);
-    let roboDesenhado = false;
+    const centro = centroDaGrade(estado.fase);
+
+    // Monta tudo que vai ser desenhado, já com o giro aplicado, e ordena por
+    // profundidade (de trás para frente). O robô entra na lista como mais um
+    // item: assim uma casa alta na frente dele o esconde de verdade.
+    const itens = [];
 
     for (let y = 0; y < grade.length; y++) {
       for (let x = 0; x < grade[y].length; x++) {
-        desenharCasa(estado, x, y, tempo);
-        if (x === roboX && y === roboY) {
-          desenharRobo(visual, tempo);
-          roboDesenhado = true;
-        }
+        if (!grade[y][x]) continue;
+        const g = girarCoord(x, y, anguloAtual, centro);
+        itens.push({ tipo: "casa", x: x, y: y, girada: g, profundidade: g.x + g.y });
       }
     }
 
-    // Se o robô estiver fora da grade (não deveria acontecer), desenha por cima
-    // para ele nunca sumir da tela sem explicação.
-    if (!roboDesenhado) {
-      desenharRobo(visual, tempo);
-    }
+    const gRobo = girarCoord(visual.x, visual.y, anguloAtual, centro);
+    itens.push({
+      tipo: "robo",
+      girada: gRobo,
+      // O empurrãozinho garante que o robô venha depois da própria casa,
+      // mesmo quando os dois têm exatamente a mesma profundidade.
+      profundidade: gRobo.x + gRobo.y + 0.001
+    });
+
+    itens.sort(function (a, b) { return a.profundidade - b.profundidade; });
+
+    itens.forEach(function (item) {
+      if (item.tipo === "casa") {
+        desenharCasa(estado, item.x, item.y, item.girada, tempo);
+      } else {
+        desenharRobo(visual, item.girada, anguloAtual, tempo);
+      }
+    });
   }
 
   return {
     iniciar: iniciar,
     enquadrar: enquadrar,
-    desenhar: desenhar
+    desenhar: desenhar,
+    girar: girar,
+    reiniciarCamera: reiniciarCamera,
+    quartosDeVolta: quartosDeVolta
   };
 })();

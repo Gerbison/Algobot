@@ -117,6 +117,38 @@ O enquadramento (`Render.enquadrar`) mede o tabuleiro inteiro e calcula
 deslocamento e escala para ele caber no canvas. Por isso uma fase 8x8 e uma 4x4
 aparecem ambas centralizadas e do tamanho certo, sem número mágico nenhum.
 
+### 3b. Girar a câmera
+
+O aluno pode girar o tabuleiro (botões ↺ ↻ ou teclas Q e E) para ver o que uma
+casa alta está escondendo. Em vez de escrever quatro projeções, giramos as
+**coordenadas** em torno do centro do tabuleiro e aplicamos sempre a mesma
+projeção:
+
+```
+p' = centro + R(θ) · (p - centro)
+```
+
+Duas consequências de fazer assim: θ pode ser um valor qualquer, então o giro
+fica animado só interpolando θ; e, como o giro é em torno do centro, o
+tabuleiro nunca escapa da tela.
+
+Isso obrigou a mudar a ordem de desenho. Com as coordenadas giradas, a
+profundidade `x + y` não segue mais a ordem das linhas da matriz, então o
+laço aninhado deixou de bastar: agora montamos a lista de tudo que vai ser
+desenhado (casas **e** o robô) e ordenamos por profundidade a cada quadro.
+São no máximo 64 casas; ordenar isso 60 vezes por segundo não custa nada, e é
+muito mais fácil de conferir do que deduzir o laço certo para cada ângulo.
+
+`Render.enquadrar` mede a **união das quatro orientações**, não só a atual. Se
+medisse só a atual, um tabuleiro não quadrado (a fase 9 é 8x4) mudaria de
+escala no meio do giro e a imagem ficaria "respirando".
+
+**A câmera é puramente visual.** O motor continua raciocinando em NORTE/SUL/
+LESTE/OESTE do tabuleiro; nenhum comando muda de efeito porque a vista girou.
+O visor do robô gira junto com a câmera — o vetor da direção é girado pelo
+mesmo θ antes de ser projetado —, então o que o aluno vê continua batendo com
+o que vai acontecer.
+
 ## O código de conclusão
 
 Formato: `ALG-XXXXX-XXXX`.

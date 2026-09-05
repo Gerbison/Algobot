@@ -573,6 +573,20 @@
       b.addEventListener("click", fecharJanelas);
     });
 
+    /* Câmera. Girar é só ponto de vista: não mexe no estado do jogo, então
+     * funciona inclusive com o robô andando. */
+    $("btn-girar-esq").addEventListener("click", function () { Render.girar(-1); });
+    $("btn-girar-dir").addEventListener("click", function () { Render.girar(1); });
+
+    document.addEventListener("keydown", function (ev) {
+      // Não sequestrar as teclas enquanto o aluno digita o nome.
+      if (ev.target && ev.target.tagName === "INPUT") return;
+
+      const tecla = ev.key.toLowerCase();
+      if (tecla === "q") Render.girar(-1);
+      if (tecla === "e") Render.girar(1);
+    });
+
     window.addEventListener("resize", function () {
       if (fase) ajustarCanvas();
     });

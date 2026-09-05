@@ -32,6 +32,16 @@
   <section id="coluna-tabuleiro">
     <div id="caixa-canvas">
       <canvas id="tabuleiro" width="820" height="520"></canvas>
+
+      <!-- Controles de câmera. Só mudam o ângulo de visão: não interferem
+           em nada na lógica dos comandos. -->
+      <div class="camera">
+        <button id="btn-girar-esq" class="botao-camera" type="button"
+                title="Girar a vista para a esquerda (tecla Q)">↺</button>
+        <button id="btn-girar-dir" class="botao-camera" type="button"
+                title="Girar a vista para a direita (tecla E)">↻</button>
+      </div>
+      <div class="camera-legenda">Girar a vista</div>
     </div>
     <div id="mensagem" class="mensagem"></div>
   </section>

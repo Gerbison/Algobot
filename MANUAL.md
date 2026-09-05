@@ -20,6 +20,18 @@ Se o robô errar, ele para onde falhou, o comando problemático fica vermelho e 
 mensagem explica o que aconteceu. Não existe "game over" — é só corrigir e
 rodar de novo.
 
+### Girar a vista
+
+Nos tabuleiros com casas altas, uma casa pode esconder outra. Os dois botões no
+canto superior direito do tabuleiro (**↺** e **↻**) giram a câmera um quarto de
+volta, para o aluno enxergar o que está atrás. Também dá para usar as teclas
+**Q** e **E**.
+
+Isso é **só ponto de vista**: girar a câmera não muda nada na lógica dos
+comandos. `GIRAR ESQ` e `GIRAR DIR` continuam sendo em relação ao robô, e
+`AVANÇAR` continua indo para onde o visor dele aponta — e o visor gira junto
+com a tela, então o que se vê continua batendo com o que acontece.
+
 ### Os comandos
 
 | Comando | O que faz |
@@ -128,32 +140,35 @@ const NOME_JOGO = "AlgoBot";
 
 O nome novo aparece no título da janela, no cabeçalho e na tela de boas-vindas.
 
-## Como publicar no GitHub Pages
+## O jogo publicado
 
-**Antes de mais nada:** o Pages **não funciona em repositório privado no plano
-gratuito** do GitHub — ele exige GitHub Pro ou superior. Este projeto está hoje
-em `github.com/Gerbison/Algobot`, que é **privado**, então o código está a
-salvo no GitHub mas o link público ainda não existe.
+O jogo está no ar em:
 
-Isso não atrapalha o jogo em si: ele abre com duplo clique no `index.html`, sem
-servidor nenhum. Publicar só passa a importar de verdade na Entrega 2, quando o
-aluno precisar de um endereço para abrir de casa.
-
-Quando chegar essa hora, há três saídas:
-
-- **tornar o repositório público** — não há nada sensível aqui: sem senha, sem
-  chave de API, sem dado de aluno. É a saída mais simples e gratuita;
-- **assinar o GitHub Pro**, mantendo tudo privado;
-- **hospedar em outro serviço** de site estático.
-
-Feita a escolha, o resto é só ligar o Pages: em **Settings → Pages**, escolha
-**Deploy from a branch**, branch `main`, pasta `/ (root)`, e salve. Em um ou
-dois minutos o jogo estará em `https://gerbison.github.io/Algobot/`.
+**https://gerbison.github.io/Algobot/**
 
 Atenção ao endereço: o GitHub diferencia maiúsculas de minúsculas na URL, e o
 repositório se chama `Algobot`, com `A` maiúsculo e `b` minúsculo.
 
-Como tudo é arquivo estático, esse link funciona igual ao duplo clique local.
+Repositório: `github.com/Gerbison/Algobot`, **público** — o Pages não atende
+repositório privado no plano gratuito do GitHub, por isso a visibilidade foi
+aberta. Não há nada sensível no código: sem senha, sem chave de API, sem dado
+de aluno.
+
+### Como atualizar o que está no ar
+
+Não existe build step: publicar é só empurrar os arquivos.
+
+```bash
+git push origin main
+```
+
+Um ou dois minutos depois o site já reflete a mudança. Se o navegador insistir
+em mostrar a versão antiga, force a recarga com `Ctrl+F5`.
+
+### Como isso foi ligado
+
+Em **Settings → Pages**, com *Deploy from a branch*, branch `main`, pasta
+`/ (root)`. Se algum dia o site sumir, é o primeiro lugar a conferir.
 
 ### Se você for criar outro repositório do zero
 
