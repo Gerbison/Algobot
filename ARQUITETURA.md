@@ -37,6 +37,7 @@ js/interpretador.js decide qual comando vem a seguir; pilha de chamadas F1/F2
 js/estrelas.js      pontuação e código de conclusão
 js/codigo.js        traduz a solução para TypeScript e comenta o que o aluno fez
 js/guia.js          guia dos comandos na coluna da esquerda (textos + exemplos)
+js/captura.js       monta a imagem PNG da fase para o aluno enviar
 js/storage.js       fachada de persistência (hoje só localStorage)
 js/render.js        desenho isométrico no Canvas
 js/ui.js            a cola: DOM, arrastar/clicar, execução animada, janelas
@@ -203,6 +204,30 @@ desenha — para mudar uma explicação não é preciso entender o DOM.
 
 A 1366x768 as três colunas ficam guia 270px + tabuleiro ~640px + programação
 400px. O guia rola por dentro; a página continua sem rolagem.
+
+### 6. A captura da fase
+
+`captura.js` monta a imagem num canvas à parte (cabeçalho, cópia do
+tabuleiro, programa desenhado em fichas, rodapé com a situação), em vez de
+"fotografar" a página. O navegador não deixa uma página tirar print de si
+mesma sem biblioteca externa, e o jogo não usa nenhuma; montando à parte, a
+imagem também sai igual em qualquer tamanho de tela.
+
+Três detalhes que já deram problema e estão tratados:
+
+- **O tabuleiro é redesenhado na hora da captura.** O desenho normal roda no
+  `requestAnimationFrame`, que o navegador pausa com a aba fora de vista; logo
+  depois de uma troca de fase o canvas pode estar vazio, e a captura saía sem
+  tabuleiro.
+- **Os botões ficam desligados até o PNG ficar pronto.** Converter a imagem leva
+  cerca de 1 segundo num PC modesto; antes disso, clicar em *Baixar* não fazia
+  nada, o que parecia defeito.
+- **As estrelas só aparecem se valem para o programa montado.** `resultadoAtual`
+  é zerado sempre que um comando entra ou sai, na troca de fase, ao limpar e ao
+  executar de novo.
+
+*Copiar* e *Enviar* usam APIs que só existem em página segura (https ou
+localhost). Aberto por `file://` os botões são escondidos em vez de falhar.
 
 ## O código de conclusão
 

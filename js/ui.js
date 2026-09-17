@@ -32,6 +32,15 @@
   // Interpolação do robô entre duas casas.
   let animacao = null;
 
+  // Resultado da última vitória ({estrelas, usados}), usado pela captura.
+  // Volta a null sempre que o programa muda: senão a imagem mostraria as
+  // estrelas de uma solução que já não está mais montada.
+  let resultadoAtual = null;
+
+  // PNG da última captura, guardado para os botões baixar/copiar/enviar.
+  let capturaBlob = null;
+  let capturaUrl = null;
+
   /* ------------------------------------------------------------ atalhos -- */
 
   const $ = function (id) { return document.getElementById(id); };
@@ -46,6 +55,7 @@
     fase = FASES[indiceFase];
     estado = Motor.criarEstado(fase);
     animacao = null;
+    resultadoAtual = null;
 
     // Cada área começa com o número de espaços da fase, todos vazios.
     programa = {
@@ -193,6 +203,7 @@
 
       if (programa[area][indice]) {
         programa[area][indice] = null;
+        resultadoAtual = null;
         redesenharSlots();
         atualizarContador();
       } else if (comandoSelecionado) {
@@ -212,6 +223,7 @@
 
   function colocar(area, indice, comando) {
     programa[area][indice] = comando;
+    resultadoAtual = null;
     redesenharSlots();
     atualizarContador();
     mensagem("Monte a sequência de comandos e aperte Executar.", "");
@@ -286,6 +298,7 @@
 
     // Toda execução começa do zero: o tabuleiro volta ao estado da fase.
     estado = Motor.criarEstado(fase);
+    resultadoAtual = null;
     animacao = null;
     execucao = Interpretador.criarExecucao(programa);
     rodando = true;
@@ -389,6 +402,7 @@
     const estrelas = Estrelas.calcular(fase, usados);
 
     progresso = Storage.registrarConclusao(progresso, fase.id, estrelas, usados);
+    resultadoAtual = { estrelas: estrelas, usados: usados };
 
     $("estrelas-vitoria").textContent =
       "★".repeat(estrelas) + "☆".repeat(3 - estrelas);
@@ -464,6 +478,103 @@
     } else {
       alvo.classList.add("oculto");
     }
+  }
+
+  /* --------------------------------------------------------- captura --- */
+
+  function statusCaptura(texto, erro) {
+    $("status-captura").textContent = texto;
+    $("status-captura").classList.toggle("erro", !!erro);
+  }
+
+  function abrirCaptura() {
+    // O tabuleiro é redesenhado pelo requestAnimationFrame, que o navegador
+    // pausa quando a aba não está sendo exibida. Se o canvas acabou de ser
+    // redimensionado (troca de fase), ele pode estar vazio nesse momento e a
+    // captura sairia sem tabuleiro. Desenhar aqui, na hora, elimina o risco.
+    Render.desenhar(estado, visualDoRobo());
+
+    const imagem = Captura.gerar({
+      canvasTabuleiro: canvas,
+      fase: fase,
+      programa: programa,
+      aluno: progresso.nome,
+      resultado: resultadoAtual,
+      mensagem: $("mensagem").textContent,
+      tipoMensagem: $("mensagem").classList.contains("erro") ? "erro" : ""
+    });
+
+    capturaBlob = null;
+    $("imagem-captura").removeAttribute("src");
+
+    // Gerar o PNG leva de meio segundo a um segundo num PC modesto. Até lá os
+    // botões ficam desligados e com aviso — senão o aluno clica em "Baixar",
+    // nada acontece, e parece defeito.
+    const botoesAcao = ["btn-baixar-captura", "btn-copiar-captura", "btn-compartilhar-captura"];
+    botoesAcao.forEach(function (id) { $(id).disabled = true; });
+    statusCaptura("Preparando imagem…", false);
+
+    // Copiar e enviar só funcionam em página segura (https, como no GitHub
+    // Pages). Aberto por duplo clique (file://) o navegador bloqueia; em vez
+    // de mostrar um botão que falha, escondemos.
+    const podeCopiar = window.isSecureContext && navigator.clipboard && window.ClipboardItem;
+    $("btn-copiar-captura").classList.toggle("oculto", !podeCopiar);
+    $("btn-compartilhar-captura").classList.add("oculto");
+
+    imagem.toBlob(function (blob) {
+      capturaBlob = blob;
+      if (capturaUrl) URL.revokeObjectURL(capturaUrl);
+      capturaUrl = URL.createObjectURL(blob);
+      $("imagem-captura").src = capturaUrl;
+
+      // "Enviar…" abre o menu de compartilhar do sistema (WhatsApp, e-mail,
+      // Classroom...) quando o navegador suporta mandar arquivo por ele.
+      const arquivo = new File([blob], Captura.nomeArquivo(fase, progresso.nome), { type: "image/png" });
+      const podeEnviar = navigator.canShare && navigator.canShare({ files: [arquivo] });
+      $("btn-compartilhar-captura").classList.toggle("oculto", !podeEnviar);
+
+      botoesAcao.forEach(function (id) { $(id).disabled = false; });
+      statusCaptura("", false);
+    }, "image/png");
+
+    abrirJanela("janela-captura");
+  }
+
+  function baixarCaptura() {
+    if (!capturaBlob) return;
+    const link = document.createElement("a");
+    link.href = capturaUrl;
+    link.download = Captura.nomeArquivo(fase, progresso.nome);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    statusCaptura("Imagem baixada: " + link.download + " (veja a pasta Downloads).", false);
+  }
+
+  function copiarCaptura() {
+    if (!capturaBlob) return;
+    navigator.clipboard.write([new ClipboardItem({ "image/png": capturaBlob })])
+      .then(function () {
+        statusCaptura("Imagem copiada. Agora é só colar (Ctrl+V) onde quiser enviar.", false);
+      })
+      .catch(function () {
+        statusCaptura("O navegador não deixou copiar. Use \"Baixar imagem\".", true);
+      });
+  }
+
+  function compartilharCaptura() {
+    if (!capturaBlob) return;
+    const arquivo = new File([capturaBlob], Captura.nomeArquivo(fase, progresso.nome), { type: "image/png" });
+    navigator.share({
+      files: [arquivo],
+      title: NOME_JOGO + " — Fase " + fase.id,
+      text: NOME_JOGO + " — Fase " + fase.id + ": " + fase.nome
+    }).catch(function (erro) {
+      // Fechar o menu sem escolher também cai aqui; isso não é erro.
+      if (erro && erro.name !== "AbortError") {
+        statusCaptura("Não foi possível enviar. Use \"Baixar imagem\".", true);
+      }
+    });
   }
 
   /* -------------------------------------------------------- animação --- */
@@ -582,11 +693,18 @@
       });
       estado = Motor.criarEstado(fase);
       animacao = null;
+      resultadoAtual = null;
       redesenharSlots();
       atualizarContador();
       limparDestaques();
       mensagem("Áreas limpas. Comece de novo.", "");
     });
+
+    $("btn-capturar").addEventListener("click", abrirCaptura);
+    $("btn-capturar-vitoria").addEventListener("click", abrirCaptura);
+    $("btn-baixar-captura").addEventListener("click", baixarCaptura);
+    $("btn-copiar-captura").addEventListener("click", copiarCaptura);
+    $("btn-compartilhar-captura").addEventListener("click", compartilharCaptura);
 
     $("btn-dica").addEventListener("click", function () {
       $("texto-dica").textContent = fase.dica;

@@ -40,6 +40,38 @@ Para mudar algum texto ou exemplo, edite o objeto `CONTEUDO` no topo de
 `js/guia.js`. Se criar um comando novo, o teste (`node test/solucoes.test.js`)
 avisa caso ele fique sem cartão no guia.
 
+### Capturar a fase
+
+O botão **📷 Capturar fase**, no canto superior esquerdo do tabuleiro, gera uma
+imagem PNG para o aluno enviar. Ele também aparece na tela de vitória.
+
+A imagem traz, numa figura só:
+
+- nome do jogo, número e nome da fase, conceito, **nome do aluno** e data/hora;
+- o tabuleiro como está no momento;
+- o programa montado em cada área (PRINCIPAL, F1, F2), com as mesmas cores dos
+  botões e a contagem de espaços usados;
+- a situação: estrelas e número de comandos se a fase foi concluída, a mensagem
+  de erro se não, ou "em andamento".
+
+Na janela que abre, o aluno escolhe o destino:
+
+| Botão | O que faz | Quando aparece |
+|---|---|---|
+| **Baixar imagem** | salva o PNG na pasta Downloads | sempre |
+| **Copiar imagem** | copia para colar com Ctrl+V (WhatsApp Web, Classroom, e-mail) | só no site publicado (https) |
+| **Enviar…** | abre o menu de compartilhar do sistema | só onde o navegador permite enviar arquivo (comum no celular) |
+
+Aberto por **duplo clique** no `index.html`, o navegador bloqueia copiar e enviar
+por segurança; aí só aparece *Baixar*. No endereço do GitHub Pages os três
+funcionam, conforme o navegador.
+
+O arquivo sai com um nome fácil de organizar quando você recebe vários:
+`algobot-fase-05-maria-luiza-2026-09-17.png`.
+
+O jogo **não envia a imagem para lugar nenhum sozinho** — quem escolhe o destino
+é o aluno.
+
 ### Girar a vista
 
 Nos tabuleiros com casas altas, uma casa pode esconder outra. Os dois botões no

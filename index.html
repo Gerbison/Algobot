@@ -56,6 +56,9 @@
                 title="Girar a vista para a direita (tecla E)">↻</button>
       </div>
       <div class="camera-legenda">Girar a vista</div>
+
+      <button id="btn-capturar" class="botao-capturar" type="button"
+              title="Gerar uma imagem desta fase para enviar">📷 Capturar fase</button>
     </div>
     <div id="mensagem" class="mensagem"></div>
   </section>
@@ -137,6 +140,7 @@
     </div>
 
     <div class="janela-acoes">
+      <button id="btn-capturar-vitoria" class="botao">📷 Capturar</button>
       <button id="btn-refazer" class="botao">Tentar com menos comandos</button>
       <button id="btn-proxima" class="botao botao-primario">Próxima fase</button>
     </div>
@@ -148,6 +152,20 @@
     <div id="texto-codigo" class="codigo"></div>
     <div class="janela-acoes">
       <button class="botao fechar-janela">Fechar</button>
+    </div>
+  </div>
+
+  <div id="janela-captura" class="janela janela-larga oculto">
+    <h2>Captura da fase</h2>
+    <p>Esta imagem mostra o tabuleiro, os comandos que você montou e a situação da
+       fase. Escolha o que fazer com ela.</p>
+    <div class="captura-previa"><img id="imagem-captura" alt="Imagem da fase capturada"></div>
+    <p id="status-captura" class="status-captura"></p>
+    <div class="janela-acoes">
+      <button class="botao fechar-janela">Fechar</button>
+      <button id="btn-copiar-captura" class="botao">Copiar imagem</button>
+      <button id="btn-compartilhar-captura" class="botao">Enviar…</button>
+      <button id="btn-baixar-captura" class="botao botao-primario">Baixar imagem</button>
     </div>
   </div>
 
@@ -168,6 +186,7 @@
 <script src="js/estrelas.js"></script>
 <script src="js/codigo.js"></script>
 <script src="js/guia.js"></script>
+<script src="js/captura.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/render.js"></script>
 <script src="js/ui.js"></script>

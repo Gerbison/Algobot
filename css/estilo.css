@@ -788,3 +788,57 @@ body.guia-recolhido .guia-aba { display: block; }
   line-height: 17px;
   text-align: center;
 }
+
+/* ------------------------------------------------------ captura da fase -- */
+
+.botao-capturar {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid #3d6390;
+  background: rgba(33, 57, 90, 0.85);
+  color: #eaf2ff;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.botao-capturar:hover { background: #2b4a73; border-color: #6fa8e0; }
+
+.janela-larga { width: min(760px, 94vw); }
+
+.captura-previa {
+  margin-top: 10px;
+  background: #0b111b;
+  border: 1px solid #26374f;
+  border-radius: 8px;
+  padding: 8px;
+  max-height: 52vh;
+  overflow-y: auto;
+  text-align: center;
+}
+
+.captura-previa img {
+  max-width: 100%;
+  display: block;
+  margin: 0 auto;
+}
+
+.status-captura {
+  min-height: 1.4em;
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #b8f0cd !important;
+}
+.status-captura.erro { color: #ffc9d1 !important; }
+
+#janela-captura .janela-acoes {
+  position: sticky;
+  bottom: -22px;
+  background: #16243a;
+  border-top: 1px solid #2a4363;
+  padding: 14px 0 8px;
+  flex-wrap: wrap;
+}
