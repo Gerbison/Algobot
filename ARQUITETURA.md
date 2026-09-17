@@ -42,6 +42,7 @@ js/storage.js       fachada de persistência (hoje só localStorage)
 js/render.js        desenho isométrico no Canvas
 js/ui.js            a cola: DOM, arrastar/clicar, execução animada, janelas
 test/solucoes.test.js  regressão das fases, roda no Node sem navegador
+test/otimo.js       busca por força bruta o menor programa que resolve uma fase
 ```
 
 A ordem dos `<script>` em `index.html` importa: `config.js` primeiro (todo mundo
@@ -228,6 +229,31 @@ Três detalhes que já deram problema e estão tratados:
 
 *Copiar* e *Enviar* usam APIs que só existem em página segura (https ou
 localhost). Aberto por `file://` os botões são escondidos em vez de falhar.
+
+### 7. As 22 fases e a calibragem das estrelas
+
+As fases 13 a 22 foram acrescentadas depois que a turma terminou as 12 primeiras
+em menos de 25 minutos. Nada de comando novo: as ideias novas saem de combinar
+os mesmos sete.
+
+O limite de 3 estrelas só vale alguma coisa se for mesmo o menor programa
+possível. Por isso existe `test/otimo.js`: ele experimenta, em ordem crescente
+de tamanho, **todos** os programas que cabem nos espaços da fase, e para no
+primeiro que vence — o que encontra é, por construção, o mínimo.
+
+Ele reimplementa as regras do motor de forma enxuta (inteiros em vez de objetos)
+para caber no orçamento de tempo. Isso é duplicação de regra, e é o risco
+conhecido deste arquivo: se `motor.js` mudar, `otimo.js` precisa mudar junto.
+A conferência é o `solucoes.test.js`, onde toda solução conhecida também precisa
+vencer.
+
+Força bruta cresce rápido: até 9 comandos a busca termina em segundos ou
+minutos; acima disso o script avisa que desistiu e não afirma nada. Foi
+provado mínimo nas fases 1, 2, 5, 9, 10, 13, 15, 17, 18 e 19. Nas fases com
+solução mais longa (14, 16, 20, 21, 22) o limite vem da solução conhecida, e
+sabemos apenas que não existe nada com até 9 comandos. Se um aluno achar algo
+menor, ganha as 3 estrelas do mesmo jeito — o limite é "até N", não "exatamente
+N".
 
 ## O código de conclusão
 

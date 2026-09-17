@@ -18,6 +18,7 @@
     <span id="rotulo-fase">Fase 1</span>
     <span id="nome-fase">—</span>
     <span id="selo-conceito" class="selo">Conceito: —</span>
+    <span id="selo-nivel" class="selo selo-nivel">—</span>
   </div>
 
   <div class="cabecalho-acoes">
@@ -171,9 +172,11 @@
 
   <div id="janela-dica" class="janela oculto">
     <h2>Dica</h2>
-    <p id="texto-dica"></p>
+    <!-- As dicas aparecem uma de cada vez, da mais leve para a mais direta. -->
+    <div id="lista-dicas"></div>
     <div class="janela-acoes">
-      <button class="botao fechar-janela">Entendi</button>
+      <button id="btn-mais-dica" class="botao">Ainda não entendi</button>
+      <button class="botao botao-primario fechar-janela">Entendi</button>
     </div>
   </div>
 

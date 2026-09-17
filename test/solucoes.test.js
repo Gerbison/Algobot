@@ -59,7 +59,21 @@ const SOLUCOES = {
   9: { principal: ["F1"], f1: [A, L, "F1"] },
   10: { principal: ["F1"], f1: [A, A, A, L, D, "F1"] },
   11: { principal: ["F1", "F1", "F1", "F1"], f1: ["F2", "F2", "F2", D], f2: [A, A, L] },
-  12: { principal: ["F1"], f1: ["F2", "F2", D, "F1"], f2: [A, A, A, L] }
+  12: { principal: ["F1"], f1: ["F2", "F2", D, "F1"], f2: [A, A, A, L] },
+
+  // ---- intermediário ----
+  13: { principal: ["F1"], f1: [P, D, P, L, E, "F1"] },
+  14: { principal: ["F1", "F1", "F1", E, "F2", "F2", "F2"], f1: [A, A, L], f2: [P, L] },
+  15: { principal: [A, A, E, "F1"], f1: [A, A, L, "F1"] },
+  16: { principal: ["F1"], f1: [E, A, D, A, A, D, A, E, L, "F1"] },
+  17: { principal: ["F2"], f1: [A, A, L], f2: ["F1", D, "F1", E, "F2"] },
+
+  // ---- difícil ----
+  18: { principal: ["F1"], f1: [A, A, P, L, D, "F1"] },
+  19: { principal: ["F1"], f1: ["F2", "F2", D, "F1"], f2: [P, P, P, L] },
+  20: { principal: ["F1"], f1: [A, E, "F2", L, D, D, "F2", E, A, "F1"], f2: [A, A, A] },
+  21: { principal: ["F1"], f1: [A, A, L, D, "F2"], f2: [P, L, E, "F1"] },
+  22: { principal: ["F1"], f1: [A, E, "F2", "F2", D, A, "F1"], f2: [A, A, L, D, D, A, A] }
 };
 
 /* Executa um programa até vencer, falhar ou acabar. Mesma lógica do jogo,
@@ -241,6 +255,20 @@ testarCodigo("recursão é explicada e vira while", function () {
     "o while não pode chamar f1 de novo, senão continua recursivo: " + analise.codigoAlternativa);
 });
 
+testarCodigo("recursão mútua é reconhecida (fase 21)", function () {
+  const s = SOLUCOES[21];
+  const analise = Codigo.analisar({ principal: s.principal, f1: s.f1, f2: s.f2 });
+  assert.ok(/recursão mútua/.test(analise.explicacao),
+    "deveria nomear recursão mútua; veio: " + analise.explicacao);
+  assert.ok(/while \(/.test(analise.codigoAlternativa), "a alternativa deveria usar while");
+  assert.ok(!/f1\(\)|f2\(\)/.test(analise.codigoAlternativa),
+    "o while não pode chamar as funções de novo, senão continua recursivo:\n" + analise.codigoAlternativa);
+  // o corpo do while precisa ter os comandos das duas funções, na ordem
+  const corpo = analise.codigoAlternativa;
+  assert.ok(corpo.indexOf("avancar();") < corpo.indexOf("pular();"),
+    "a F1 (plano) roda antes da F2 (degrau):\n" + corpo);
+});
+
 testarCodigo("TypeScript gerado tem uma função por área usada", function () {
   const ts = Codigo.gerarTypeScript({ principal: ["F1", "F2"], f1: [A, L], f2: [P] });
   assert.ok(/function principal\(\): void \{/.test(ts), "faltou a principal");
@@ -255,7 +283,7 @@ testarCodigo("TypeScript gerado tem uma função por área usada", function () {
   assert.ok(!/function f1/.test(soPrincipal), "F1 vazia não deveria aparecer no código");
 });
 
-testarCodigo("as 12 soluções geram revisão sem quebrar", function () {
+testarCodigo("todas as soluções geram revisão sem quebrar", function () {
   FASES.forEach(function (fase) {
     const s = SOLUCOES[fase.id];
     const programa = { principal: s.principal || [], f1: s.f1 || [], f2: s.f2 || [] };

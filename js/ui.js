@@ -37,6 +37,10 @@
   // estrelas de uma solução que já não está mais montada.
   let resultadoAtual = null;
 
+  // Quantas dicas da fase já foram mostradas (as fases difíceis têm várias,
+  // da mais leve para a mais direta).
+  let dicasReveladas = 1;
+
   // PNG da última captura, guardado para os botões baixar/copiar/enviar.
   let capturaBlob = null;
   let capturaUrl = null;
@@ -70,6 +74,9 @@
     $("rotulo-fase").textContent = "Fase " + fase.id;
     $("nome-fase").textContent = fase.nome;
     $("selo-conceito").textContent = "Conceito: " + fase.conceito;
+    $("selo-nivel").textContent = fase.nivel || "básico";
+    $("selo-nivel").dataset.nivel = fase.nivel || "básico";
+    dicasReveladas = 1;
 
     montarPaleta();
     montarAreas();
@@ -266,6 +273,34 @@
     const el = $("mensagem");
     el.textContent = texto;
     el.className = "mensagem" + (tipo ? " " + tipo : "");
+  }
+
+  /* Uma fase pode ter várias dicas em ordem ("dicas") ou uma só ("dica").
+   * Mostramos só as já reveladas: o aluno pede a próxima se ainda travar. */
+  function listaDeDicas() {
+    return fase.dicas || [fase.dica];
+  }
+
+  function mostrarDicas() {
+    const todas = listaDeDicas();
+    const caixa = $("lista-dicas");
+    caixa.innerHTML = "";
+
+    todas.slice(0, dicasReveladas).forEach(function (texto, i) {
+      const item = document.createElement("p");
+      item.className = "dica-item";
+      if (todas.length > 1) {
+        const n = document.createElement("span");
+        n.className = "dica-numero";
+        n.textContent = (i + 1) + "ª dica";
+        item.appendChild(n);
+      }
+      item.appendChild(document.createTextNode(texto));
+      caixa.appendChild(item);
+    });
+
+    const faltam = dicasReveladas < todas.length;
+    $("btn-mais-dica").classList.toggle("oculto", !faltam);
   }
 
   function limparDestaques() {
@@ -662,6 +697,8 @@
       botao.innerHTML =
         '<span class="numero">' + f.id + "</span>" +
         '<span class="titulo">' + f.nome + "</span>" +
+        '<span class="nivel-cartao" data-nivel="' + (f.nivel || "básico") + '">' +
+        (f.nivel || "básico") + "</span>" +
         '<span class="estrelas">' +
         (registro ? "★".repeat(registro.estrelas) + "☆".repeat(3 - registro.estrelas) : "☆☆☆") +
         "</span>";
@@ -707,8 +744,13 @@
     $("btn-compartilhar-captura").addEventListener("click", compartilharCaptura);
 
     $("btn-dica").addEventListener("click", function () {
-      $("texto-dica").textContent = fase.dica;
+      mostrarDicas();
       abrirJanela("janela-dica");
+    });
+
+    $("btn-mais-dica").addEventListener("click", function () {
+      dicasReveladas++;
+      mostrarDicas();
     });
 
     $("btn-fases").addEventListener("click", function () {

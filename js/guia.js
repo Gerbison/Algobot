@@ -43,7 +43,8 @@ const Guia = (function () {
 
     GIRAR_DIR: {
       texto: "Vira o robô para a direita, sem sair do lugar. " +
-             "Muda só para onde ele olha.",
+             "Dois giros seguidos para o mesmo lado deixam o robô de costas: " +
+             "é a meia-volta, para voltar pelo caminho por onde veio.",
       antes: [{ robo: "→" }],
       depois: [{ robo: "↓" }]
     },

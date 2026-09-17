@@ -127,6 +127,31 @@ apresentar função e laço.
 O que conta é **quantos comandos foram escritos**, não quantas vezes eles
 rodaram. É isso que premia quem descobre a sub-rotina.
 
+## As fases
+
+São **22 fases**, em três níveis. O nível aparece no topo da tela e na lista de
+fases.
+
+| Fases | Nível | O que o aluno descobre |
+|---|---|---|
+| 1 a 4 | básico | sequência de comandos e alturas (PULAR) |
+| 5 a 8 | básico | função: o caminho não cabe na PRINCIPAL, nasce a F1 |
+| 9 a 12 | básico | laço: a F1 chamando a si mesma, e a F2 |
+| 13 a 17 | intermediário | PULAR que desce, duas funções em sequência, preparar antes de repetir, desvio, função dentro de função |
+| 18 a 22 | difícil | repetição escondida, ida e volta, funções que se chamam, reuso dos dois lados |
+
+As fases difíceis têm **espaços contados**: a solução "na força bruta" não cabe,
+e é isso que obriga a achar o padrão. Elas também têm **dicas em sequência**: o
+aluno vê a primeira, e pede a próxima no botão *Ainda não entendi*. A última
+dica nunca entrega a solução — aponta onde olhar.
+
+### Sugestão de uso em aula
+
+- **1 a 12**: uma aula. Turma rápida termina em 25 a 30 minutos.
+- **13 a 17**: uma aula, com parada na 15 para falar de "o que vem antes do laço".
+- **18 a 22**: em dupla, discutindo antes de montar. A 20 e a 22 rendem conversa
+  sobre *ida e volta*; a 21 é o gancho para funções que se chamam.
+
 ## Como criar uma fase nova
 
 Abra `js/fases.js` e acrescente um objeto no fim do array `FASES`. Exemplo
@@ -134,12 +159,13 @@ comentado linha a linha:
 
 ```javascript
 {
-  // 13 porque a última fase existente é a 12. O id precisa ser único e
+  // 23 porque a última fase existente é a 22. O id precisa ser único e
   // sequencial: é ele que controla o desbloqueio da fase seguinte.
-  id: 13,
+  id: 23,
 
   nome: "Minha fase nova",     // aparece no topo da tela
   conceito: "sub-rotina",      // vira o selo "Conceito: sub-rotina"
+  nivel: "intermediário",      // "básico", "intermediário" ou "difícil"
 
   // O tabuleiro. Cada linha é um y, cada coluna é um x.
   //   0     = buraco: essa casa não existe
@@ -180,6 +206,15 @@ comentado linha a linha:
   // Aparece quando o aluno aperta "Dica". Empurre o raciocínio, não entregue
   // a resposta pronta.
   dica: "Repare que os dois lados do caminho são iguais."
+
+  // Em fase difícil, use "dicas" no lugar de "dica": uma lista em ordem, da
+  // mais leve para a mais direta. O aluno vê uma e pede a próxima se travar.
+  // Nem a última pode entregar a solução.
+  //
+  // dicas: [
+  //   "Os quatro lados parecem diferentes, mas o robô faz a mesma coisa.",
+  //   "Repare no último degrau: PULAR também desce."
+  // ]
 }
 ```
 
@@ -203,6 +238,22 @@ node test/solucoes.test.js
 O teste confere que a sua solução cabe nos espaços, só usa comandos que estão
 na paleta, **realmente vence** quando executada no motor de verdade, e vale as
 três estrelas. É o que impede uma fase impossível de chegar na frente da turma.
+
+### Conferindo se o limite de estrelas está certo
+
+O teste acima prova que a **sua** solução funciona, não que ela é a menor. Se
+houver um atalho mais curto, a fase difícil vira fácil. Para conferir:
+
+```bash
+node test/otimo.js 23
+```
+
+Ele experimenta todos os programas possíveis, do menor para o maior, e mostra o
+primeiro que vence — esse é o mínimo. Avisa em letras maiúsculas se o mínimo for
+menor que o seu limite de 3 estrelas.
+
+É força bruta: funciona bem até uns 9 comandos no total. Acima disso ele desiste
+e diz que não conseguiu afirmar nada.
 
 ### Como trocar o nome do jogo
 

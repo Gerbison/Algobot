@@ -114,6 +114,37 @@ const Codigo = (function () {
     const f1Recursiva = f1.indexOf("F1") >= 0;
     const f2Recursiva = f2.indexOf("F2") >= 0;
 
+    /* --- caso 0: recursão mútua. F1 chama F2 e F2 chama F1: as duas se
+     * revezam para sempre. Precisa vir antes do caso 1, senão uma delas
+     * seria lida como recursão simples. --- */
+    if (f1.indexOf("F2") >= 0 && f2.indexOf("F1") >= 0 && !f1Recursiva && !f2Recursiva) {
+      // Quem a PRINCIPAL chama primeiro começa o laço.
+      const comecaNaF1 = principal.indexOf("F1") >= 0 &&
+        (principal.indexOf("F2") < 0 || principal.indexOf("F1") < principal.indexOf("F2"));
+
+      const primeira = (comecaNaF1 ? f1 : f2).filter(function (c) { return c !== (comecaNaF1 ? "F2" : "F1"); });
+      const segunda = (comecaNaF1 ? f2 : f1).filter(function (c) { return c !== (comecaNaF1 ? "F1" : "F2"); });
+
+      return {
+        explicacao:
+          "Suas duas funções se chamam uma à outra: a F1 termina chamando a F2, " +
+          "e a F2 termina chamando a F1. Elas se revezam, e juntas formam um " +
+          "laço só. Isso tem nome: recursão mútua.",
+        tituloAlternativa: "O mesmo revezamento em um laço só",
+        textoAlternativa:
+          "Quando dois trechos se alternam sempre na mesma ordem, dá para pôr " +
+          "os dois dentro de um while, um depois do outro:",
+        codigoAlternativa: [
+          "function principal(): void {",
+          "  while (aindaFaltaAlvo()) {"
+        ]
+          .concat(indentar(primeira.map(function (c) { return FUNCAO[c] + "();"; }), 2))
+          .concat(indentar(segunda.map(function (c) { return FUNCAO[c] + "();"; }), 2))
+          .concat(["  }", "}"])
+          .join("\n")
+      };
+    }
+
     /* --- caso 1: recursão. A função se chama e vira um laço. --- */
     if (f1Recursiva || f2Recursiva) {
       const area = f1Recursiva ? f1 : f2;

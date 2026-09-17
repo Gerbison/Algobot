@@ -842,3 +842,36 @@ body.guia-recolhido .guia-aba { display: block; }
   padding: 14px 0 8px;
   flex-wrap: wrap;
 }
+
+/* ------------------------------------------------------------ nível/dicas -- */
+
+.selo-nivel { text-transform: capitalize; }
+.selo-nivel[data-nivel="intermediário"] { background: #4a3a17; color: #ffd447; border-color: #7a5f22; }
+.selo-nivel[data-nivel="difícil"] { background: #4a1f28; color: #ff9fae; border-color: #8b2437; }
+
+.dica-item {
+  margin: 0 0 12px;
+  padding-left: 12px;
+  border-left: 2px solid #37608c;
+  line-height: 1.5;
+}
+
+.dica-numero {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #8fb3dd;
+  margin-bottom: 3px;
+}
+
+.cartao-fase .nivel-cartao {
+  display: block;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #7f93ad;
+  margin-bottom: 3px;
+}
+.cartao-fase .nivel-cartao[data-nivel="intermediário"] { color: #ffd447; }
+.cartao-fase .nivel-cartao[data-nivel="difícil"] { color: #ff9fae; }
