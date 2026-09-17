@@ -29,6 +29,20 @@
 
 <main id="palco">
 
+  <!-- Guia dos comandos: sempre visível, pode ser recolhido. -->
+  <aside id="coluna-guia">
+    <div class="guia-topo">
+      <h2 class="bloco-titulo">Guia dos comandos</h2>
+      <button id="btn-recolher-guia" class="botao-recolher" type="button"
+              title="Esconder o guia" aria-label="Esconder o guia">‹</button>
+    </div>
+    <div id="guia-conteudo" class="guia-conteudo"></div>
+
+    <!-- Aparece só com o guia recolhido. -->
+    <button id="btn-abrir-guia" class="guia-aba" type="button"
+            title="Mostrar o guia dos comandos">Guia dos comandos</button>
+  </aside>
+
   <section id="coluna-tabuleiro">
     <div id="caixa-canvas">
       <canvas id="tabuleiro" width="820" height="520"></canvas>
@@ -153,6 +167,7 @@
 <script src="js/interpretador.js"></script>
 <script src="js/estrelas.js"></script>
 <script src="js/codigo.js"></script>
+<script src="js/guia.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/render.js"></script>
 <script src="js/ui.js"></script>

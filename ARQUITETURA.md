@@ -36,6 +36,7 @@ js/motor.js         as regras do jogo (mover, girar, pular, acender)
 js/interpretador.js decide qual comando vem a seguir; pilha de chamadas F1/F2
 js/estrelas.js      pontuação e código de conclusão
 js/codigo.js        traduz a solução para TypeScript e comenta o que o aluno fez
+js/guia.js          guia dos comandos na coluna da esquerda (textos + exemplos)
 js/storage.js       fachada de persistência (hoje só localStorage)
 js/render.js        desenho isométrico no Canvas
 js/ui.js            a cola: DOM, arrastar/clicar, execução animada, janelas
@@ -179,6 +180,29 @@ Duas decisões que valem registrar:
 Por isso os quatro casos são testados no Node, sem navegador. O realce de
 sintaxe (que é HTML) mora em `ui.js`, junto com o escape — o gerador continua
 produzindo texto puro.
+
+### 5. O guia dos comandos
+
+`guia.js` monta a coluna da esquerda a cada troca de fase. O conteúdo (textos e
+exemplos antes/depois) é um objeto de dados, `CONTEUDO`, separado do código que
+desenha — para mudar uma explicação não é preciso entender o DOM.
+
+- **Ordem:** comandos da fase primeiro, com F1/F2 no topo quando existem (são o
+  assunto das fases 5 em diante); depois os que a fase não oferece, apagados.
+  O rótulo é "Não usados nesta fase", e não "próximas fases", porque o PULAR
+  aparece na fase 4 e some na 5.
+- **Exemplos em vista de cima**, com caixinhas em CSS, e não isométricos: o
+  guia explica a ideia do comando e não deve disputar atenção com o tabuleiro.
+- **Recolher o guia** é uma preferência de tela, guardada por
+  `Storage.lerPreferencia/salvarPreferencia` numa chave própria
+  (`algobot.preferencias.v1`), separada do progresso: não entra no código de
+  conclusão nem deve ir para a nuvem na Entrega 2. Ao recolher/abrir, o canvas
+  é reenquadrado, porque a coluna do tabuleiro muda de largura.
+- **Teste:** `solucoes.test.js` confere que todo comando usado em alguma fase
+  tem cartão, texto, exemplo e está em `Guia.ORDEM`.
+
+A 1366x768 as três colunas ficam guia 270px + tabuleiro ~640px + programação
+400px. O guia rola por dentro; a página continua sem rolagem.
 
 ## O código de conclusão
 

@@ -63,6 +63,7 @@
 
     montarPaleta();
     montarAreas();
+    Guia.montar($("guia-conteudo"), fase.comandosDisponiveis);
     ajustarCanvas();
     mensagem("Monte a sequência de comandos e aperte Executar.", "");
     atualizarContador();
@@ -644,6 +645,16 @@
       if (tecla === "e") Render.girar(1);
     });
 
+    /* Guia dos comandos: recolher e reabrir. O canvas precisa ser
+     * reenquadrado, porque a coluna do tabuleiro muda de largura. */
+    function definirGuiaRecolhido(recolhido) {
+      document.body.classList.toggle("guia-recolhido", recolhido);
+      Storage.salvarPreferencia("guiaRecolhido", recolhido);
+      if (fase) ajustarCanvas();
+    }
+    $("btn-recolher-guia").addEventListener("click", function () { definirGuiaRecolhido(true); });
+    $("btn-abrir-guia").addEventListener("click", function () { definirGuiaRecolhido(false); });
+
     window.addEventListener("resize", function () {
       if (fase) ajustarCanvas();
     });
@@ -674,6 +685,10 @@
     $("titulo-jogo").textContent = NOME_JOGO;
     $("nome-jogo-boas-vindas").textContent = NOME_JOGO;
     $("nome-aluno").textContent = progresso.nome || "";
+
+    // Guia aberto por padrão; respeita se o aluno recolheu da última vez.
+    // Precisa vir antes de carregar a fase, que mede a largura do canvas.
+    document.body.classList.toggle("guia-recolhido", Storage.lerPreferencia("guiaRecolhido", false));
 
     Render.iniciar(canvas);
     ligarEventos();

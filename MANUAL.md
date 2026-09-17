@@ -20,6 +20,26 @@ Se o robô errar, ele para onde falhou, o comando problemático fica vermelho e 
 mensagem explica o que aconteceu. Não existe "game over" — é só corrigir e
 rodar de novo.
 
+### O guia dos comandos
+
+A coluna da esquerda explica cada comando com uma frase curta e um exemplo de
+**antes → depois** (vista de cima, com o robô em vermelho e a seta mostrando
+para onde ele olha).
+
+- Os comandos que **a fase atual oferece** vêm primeiro. Quando a fase tem
+  **F1** ou **F2**, o cartão da função sobe para o topo e aparece em destaque:
+  explica o que é uma função, mostra um exemplo montado nas áreas, o que o
+  robô realmente executa, a conta de quantos comandos se economiza, e o caso da
+  F1 chamando a si mesma (laço).
+- Os comandos que a fase **não** oferece ficam no fim, apagados, sob "Não usados
+  nesta fase".
+- A setinha **‹** no alto recolhe o guia para dar mais espaço ao tabuleiro; a aba
+  vertical "Guia dos comandos" reabre. O jogo lembra a escolha naquele computador.
+
+Para mudar algum texto ou exemplo, edite o objeto `CONTEUDO` no topo de
+`js/guia.js`. Se criar um comando novo, o teste (`node test/solucoes.test.js`)
+avisa caso ele fique sem cartão no guia.
+
 ### Girar a vista
 
 Nos tabuleiros com casas altas, uma casa pode esconder outra. Os dois botões no

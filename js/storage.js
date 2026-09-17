@@ -90,7 +90,36 @@ const Storage = (function () {
     }
   }
 
+  /*
+   * Preferências de tela (hoje: se o guia dos comandos está recolhido).
+   * Ficam numa chave separada do progresso de propósito: não são dado do
+   * aluno, não entram no código de conclusão e não vão para a nuvem na
+   * Entrega 2. Se o localStorage falhar, vale o padrão e o jogo segue.
+   */
+  const CHAVE_PREFERENCIAS = "algobot.preferencias.v1";
+
+  function lerPreferencia(nome, padrao) {
+    try {
+      const dados = JSON.parse(window.localStorage.getItem(CHAVE_PREFERENCIAS) || "{}");
+      return nome in dados ? dados[nome] : padrao;
+    } catch (e) {
+      return padrao;
+    }
+  }
+
+  function salvarPreferencia(nome, valor) {
+    try {
+      const dados = JSON.parse(window.localStorage.getItem(CHAVE_PREFERENCIAS) || "{}");
+      dados[nome] = valor;
+      window.localStorage.setItem(CHAVE_PREFERENCIAS, JSON.stringify(dados));
+    } catch (e) {
+      // sem onde guardar: a preferência vale só até recarregar a página
+    }
+  }
+
   return {
+    lerPreferencia: lerPreferencia,
+    salvarPreferencia: salvarPreferencia,
     carregarProgresso: carregarProgresso,
     salvarProgresso: salvarProgresso,
     registrarConclusao: registrarConclusao,

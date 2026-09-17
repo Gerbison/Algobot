@@ -272,6 +272,29 @@ testarCodigo("as 12 soluções geram revisão sem quebrar", function () {
   });
 });
 
+/* --------------------------------------------------------------------------
+ * Guia dos comandos: todo comando que aparece em alguma fase precisa ter
+ * cartão, texto e exemplo. Senão o aluno vê um botão sem explicação.
+ * ------------------------------------------------------------------------ */
+
+testarCodigo("todo comando das fases tem explicação no guia", function () {
+  // guia.js só toca no DOM ao montar; carregar os dados funciona no Node.
+  vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "js", "guia.js"), "utf8"), contexto);
+  const Guia = doContexto("Guia");
+
+  const usados = new Set();
+  FASES.forEach(function (f) { f.comandosDisponiveis.forEach(function (c) { usados.add(c); }); });
+
+  usados.forEach(function (cmd) {
+    const dados = Guia.CONTEUDO[cmd];
+    assert.ok(dados, cmd + " aparece numa fase mas não tem cartão no guia");
+    assert.ok(Guia.ORDEM.indexOf(cmd) >= 0, cmd + " tem cartão mas não está em Guia.ORDEM, então nunca é mostrado");
+    assert.ok(dados.texto && dados.texto.length > 20, cmd + ": explicação vazia ou curta demais");
+    const temExemplo = (dados.antes && dados.depois) || dados.exemploF1;
+    assert.ok(temExemplo, cmd + ": cartão sem exemplo");
+  });
+});
+
 console.log("");
 if (falhas > 0) {
   console.error(falhas + " teste(s) falharam.");
