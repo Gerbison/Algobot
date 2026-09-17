@@ -248,12 +248,21 @@ A conferência é o `solucoes.test.js`, onde toda solução conhecida também pr
 vencer.
 
 Força bruta cresce rápido: até 9 comandos a busca termina em segundos ou
-minutos; acima disso o script avisa que desistiu e não afirma nada. Foi
-provado mínimo nas fases 1, 2, 5, 9, 10, 13, 15, 17, 18 e 19. Nas fases com
-solução mais longa (14, 16, 20, 21, 22) o limite vem da solução conhecida, e
-sabemos apenas que não existe nada com até 9 comandos. Se um aluno achar algo
-menor, ganha as 3 estrelas do mesmo jeito — o limite é "até N", não "exatamente
-N".
+minutos; acima disso o script desiste e não afirma nada. Situação em 17/09/2026:
+
+- **Mínimo provado** (a busca achou a solução, e ela tem o tamanho do limite):
+  fases 1, 2, 5, 9, 10, 13, 15, 17, 18 e 19.
+- **Mínimo provado por exclusão**: fase 21. A busca varreu tudo até 9 comandos
+  sem achar solução, e existe uma de 10 — logo 10 é o mínimo.
+- **Não provado**: fases 14, 16, 20 e 22, cujas soluções têm 11 a 15 comandos.
+  Sabemos apenas que não existe solução com até 9. O limite vem da solução
+  conhecida.
+
+Se um aluno achar algo menor do que o limite, ganha as 3 estrelas do mesmo
+jeito — o limite é "até N", não "exatamente N".
+
+A busca de uma fase com 7 comandos na paleta e 9 de orçamento leva de 2 a 9
+minutos. Rode em segundo plano.
 
 ## O código de conclusão
 
