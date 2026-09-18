@@ -150,7 +150,9 @@ ensina é a mecânica de cada comando.
 
 ### Sugestão de uso em aula
 
-- **1 a 12**: uma aula. Turma rápida termina em 25 a 30 minutos.
+- **1 a 12**: uma aula. Com as dicas antigas, que entregavam a resposta, a turma
+  terminava em menos de 25 minutos; com as dicas novas deve demorar mais.
+  Vale anotar o tempo real da próxima turma.
 - **13 a 17**: uma aula, com parada na 15 para falar de "o que vem antes do laço".
 - **18 a 22**: em dupla, discutindo antes de montar. A 20 e a 22 rendem conversa
   sobre *ida e volta*; a 21 é o gancho para funções que se chamam.
