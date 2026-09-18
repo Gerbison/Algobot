@@ -141,9 +141,12 @@ fases.
 | 18 a 22 | difícil | repetição escondida, ida e volta, funções que se chamam, reuso dos dois lados |
 
 As fases difíceis têm **espaços contados**: a solução "na força bruta" não cabe,
-e é isso que obriga a achar o padrão. Elas também têm **dicas em sequência**: o
-aluno vê a primeira, e pede a próxima no botão *Ainda não entendi*. A última
-dica nunca entrega a solução — aponta onde olhar.
+e é isso que obriga a achar o padrão.
+
+Da fase 5 em diante, as **dicas vêm em sequência**: o aluno vê a primeira e pede
+a próxima no botão *Ainda não entendi*. Nenhuma entrega a solução — elas apontam
+onde olhar. As fases 1 a 4 têm uma dica só, mais direta, porque ali o que se
+ensina é a mecânica de cada comando.
 
 ### Sugestão de uso em aula
 

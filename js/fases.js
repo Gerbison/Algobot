@@ -116,7 +116,11 @@ const FASES = [
     espacos: { principal: 4, f1: 4, f2: 0 },
     comandosDisponiveis: ["AVANCAR", "GIRAR_ESQ", "GIRAR_DIR", "ACENDER", "F1"],
     estrelas: { duas: 8, tres: 6 },
-    dica: "A área PRINCIPAL tem só 4 espaços. Guarde o trecho que se repete dentro de F1 e chame F1 várias vezes."
+    dicas: [
+      "A área PRINCIPAL tem só 4 espaços, e o caminho precisa de bem mais comandos do que isso.",
+      "Repare no que o robô faz entre uma casa amarela e a próxima. É sempre a mesma coisa?",
+      "Tudo o que você colocar na área F1 acontece de novo cada vez que F1 aparece na PRINCIPAL."
+    ]
   },
 
   {
@@ -140,7 +144,10 @@ const FASES = [
     espacos: { principal: 5, f1: 6, f2: 0 },
     comandosDisponiveis: ["AVANCAR", "GIRAR_ESQ", "GIRAR_DIR", "ACENDER", "F1"],
     estrelas: { duas: 12, tres: 9 },
-    dica: "Os quatro lados do quadrado são iguais: andar até o canto, acender e girar. Isso cabe em F1."
+    dicas: [
+      "Olhe só um lado do quadrado: o que o robô precisa fazer do começo ao fim dele?",
+      "Os quatro lados são iguais. E se você escrevesse um lado só e reaproveitasse?"
+    ]
   },
 
   {
@@ -167,7 +174,10 @@ const FASES = [
     espacos: { principal: 6, f1: 6, f2: 0 },
     comandosDisponiveis: ["AVANCAR", "GIRAR_ESQ", "GIRAR_DIR", "ACENDER", "F1"],
     estrelas: { duas: 13, tres: 10 },
-    dica: "Um degrau da escada é: avançar, virar, avançar, acender e virar de volta. Repita cinco vezes."
+    dicas: [
+      "Conte as casas amarelas. O caminho de uma até a próxima muda ou é sempre igual?",
+      "Ao terminar um degrau, o robô precisa estar olhando para o mesmo lado de quando começou."
+    ]
   },
 
   {
@@ -192,7 +202,10 @@ const FASES = [
     espacos: { principal: 5, f1: 7, f2: 0 },
     comandosDisponiveis: ["AVANCAR", "GIRAR_ESQ", "GIRAR_DIR", "PULAR", "ACENDER", "F1"],
     estrelas: { duas: 13, tres: 10 },
-    dica: "Todas as casas da borda alternam de altura, então todo passo aqui é um PULAR."
+    dicas: [
+      "Na borda, nenhuma casa tem a mesma altura da vizinha. Qual comando serve para isso?",
+      "Os quatro lados são iguais — só estão virados para direções diferentes."
+    ]
   },
 
   {
@@ -219,7 +232,11 @@ const FASES = [
     espacos: { principal: 2, f1: 4, f2: 0 },
     comandosDisponiveis: ["AVANCAR", "GIRAR_ESQ", "GIRAR_DIR", "ACENDER", "F1"],
     estrelas: { duas: 6, tres: 4 },
-    dica: "F1 pode chamar F1. Se o último comando de F1 for o próprio F1, ela se repete sozinha."
+    dicas: [
+      "Chamar F1 várias vezes na PRINCIPAL não resolve: os espaços acabam antes das casas amarelas.",
+      "Uma função também pode aparecer dentro dela mesma. O que acontece quando o robô chega nesse comando?",
+      "Não é preciso mandar o robô parar: a fase termina sozinha quando a última casa acende."
+    ]
   },
 
   {
@@ -243,7 +260,10 @@ const FASES = [
     espacos: { principal: 2, f1: 6, f2: 0 },
     comandosDisponiveis: ["AVANCAR", "GIRAR_ESQ", "GIRAR_DIR", "ACENDER", "F1"],
     estrelas: { duas: 9, tres: 7 },
-    dica: "É o mesmo quadrado da fase 6, mas agora F1 chama a si mesma no fim. A PRINCIPAL só dá a partida."
+    dicas: [
+      "É o mesmo quadrado da fase 6, mas agora a PRINCIPAL tem só 2 espaços.",
+      "Lembra o que você descobriu na fase 9?"
+    ]
   },
 
   {
@@ -270,7 +290,10 @@ const FASES = [
     espacos: { principal: 5, f1: 5, f2: 4 },
     comandosDisponiveis: ["AVANCAR", "GIRAR_ESQ", "GIRAR_DIR", "ACENDER", "F1", "F2"],
     estrelas: { duas: 14, tres: 11 },
-    dica: "F2 guarda o trecho menor (andar duas casas e acender). F1 usa F2 três vezes e vira a esquina."
+    dicas: [
+      "Cada lado do quadrado tem três casas amarelas, e o caminho até cada uma é igual.",
+      "Aqui há uma repetição pequena (até a próxima casa amarela) dentro de uma repetição maior (o lado inteiro)."
+    ]
   },
 
   {
@@ -297,7 +320,10 @@ const FASES = [
     espacos: { principal: 2, f1: 5, f2: 5 },
     comandosDisponiveis: ["AVANCAR", "GIRAR_ESQ", "GIRAR_DIR", "ACENDER", "F1", "F2"],
     estrelas: { duas: 12, tres: 9 },
-    dica: "Agora os alvos estão de três em três. Deixe F1 chamar F2 duas vezes, virar a esquina e chamar a si mesma."
+    dicas: [
+      "Agora as casas amarelas estão de três em três, e a PRINCIPAL tem só 2 espaços.",
+      "Continua havendo uma repetição pequena dentro de uma grande. E a grande não precisa parar."
+    ]
   },
 
   /* ======================================================================

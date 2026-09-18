@@ -305,6 +305,19 @@ testarCodigo("todas as soluções geram revisão sem quebrar", function () {
  * cartão, texto e exemplo. Senão o aluno vê um botão sem explicação.
  * ------------------------------------------------------------------------ */
 
+testarCodigo("toda fase tem dica, e as listas de dicas não estão vazias", function () {
+  FASES.forEach(function (fase) {
+    const lista = fase.dicas || (fase.dica ? [fase.dica] : []);
+    assert.ok(lista.length > 0, "fase " + fase.id + " está sem dica");
+    lista.forEach(function (d, i) {
+      assert.ok(typeof d === "string" && d.trim().length > 15,
+        "fase " + fase.id + ", dica " + (i + 1) + ": vazia ou curta demais");
+    });
+    assert.ok(!(fase.dica && fase.dicas),
+      "fase " + fase.id + " tem 'dica' e 'dicas' ao mesmo tempo; o jogo só mostraria 'dicas'");
+  });
+});
+
 testarCodigo("todo comando das fases tem explicação no guia", function () {
   // guia.js só toca no DOM ao montar; carregar os dados funciona no Node.
   vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "js", "guia.js"), "utf8"), contexto);
