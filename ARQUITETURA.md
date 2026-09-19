@@ -31,7 +31,7 @@ existente foi usada; todo o visual é desenhado por código no Canvas.
 index.html          estrutura da tela e a ordem dos <script>
 css/estilo.css      todo o visual da interface (o tabuleiro é Canvas, não CSS)
 js/config.js        constantes: nome do jogo, cores, velocidades, limites
-js/fases.js         as 12 fases  ← é aqui que o professor mexe
+js/fases.js         as 22 fases  ← é aqui que o professor mexe
 js/motor.js         as regras do jogo (mover, girar, pular, acender)
 js/interpretador.js decide qual comando vem a seguir; pilha de chamadas F1/F2
 js/estrelas.js      pontuação e código de conclusão
@@ -43,6 +43,8 @@ js/render.js        desenho isométrico no Canvas
 js/ui.js            a cola: DOM, arrastar/clicar, execução animada, janelas
 test/solucoes.test.js  regressão das fases, roda no Node sem navegador
 test/otimo.js       busca por força bruta o menor programa que resolve uma fase
+test/render.test.js confere a ordem de desenho e o pulo em todos os passos
+test/solucoes-conhecidas.js  a solução pretendida de cada fase (usada pelos testes)
 ```
 
 A ordem dos `<script>` em `index.html` importa: `config.js` primeiro (todo mundo
@@ -112,10 +114,10 @@ telaX = (x - y) * (LARGURA_TILE / 2)
 telaY = (x + y) * (ALTURA_TILE / 2) - altura * ALTURA_NIVEL
 ```
 
-A ordem de desenho é o pulo do gato: a profundidade é `x + y`, e um laço com
-`y` por fora e `x` por dentro já pinta de trás para frente. O robô é desenhado
-**no meio** do laço, quando se chega à casa dele — não no fim — para que uma
-casa alta na frente realmente o esconda.
+A ordem de desenho é o pulo do gato: a profundidade das casas é `x + y`, e
+pintar da menor para a maior já desenha de trás para frente. O robô é o caso
+difícil — entre duas casas, e às vezes atrás de paredes — e tem a própria
+seção, a 8.
 
 O enquadramento (`Render.enquadrar`) mede o tabuleiro inteiro e calcula
 deslocamento e escala para ele caber no canvas. Por isso uma fase 8x8 e uma 4x4
@@ -139,7 +141,7 @@ tabuleiro nunca escapa da tela.
 Isso obrigou a mudar a ordem de desenho. Com as coordenadas giradas, a
 profundidade `x + y` não segue mais a ordem das linhas da matriz, então o
 laço aninhado deixou de bastar: agora montamos a lista de tudo que vai ser
-desenhado (casas **e** o robô) e ordenamos por profundidade a cada quadro.
+desenhado (casas **e** o robô) e ordenamos a cada quadro (seção 8).
 São no máximo 64 casas; ordenar isso 60 vezes por segundo não custa nada, e é
 muito mais fácil de conferir do que deduzir o laço certo para cada ângulo.
 
@@ -263,6 +265,64 @@ jeito — o limite é "até N", não "exatamente N".
 
 A busca de uma fase com 7 comandos na paleta e 9 de orçamento leva de 2 a 9
 minutos. Rode em segundo plano.
+
+### 8. O robô entre duas casas: ordem de desenho e pulo
+
+**O bug.** O robô recebia um número de profundidade igual ao x + y da posição
+*interpolada*. No meio de um passo entre uma casa de profundidade 3 e outra de
+4, ficava com 3,5 — e a casa 4 era pintada por cima dele. Medido em pixels no
+navegador: até **52% do robô sumia** num passo comum no plano, e **100%** na
+queda da fase 18.
+
+**Por que um número só não resolve.** Primeira tentativa: usar o maior x + y
+entre origem e destino. Resolveu o plano, mas a medição mostrou dois efeitos
+novos. Na fase 16 o destino e o muro ao lado têm o mesmo x + y, então o robô
+passou a aparecer na frente do muro. E, com a câmera girada, a casa de onde o
+robô sai pode estar à frente dele, e qualquer ponto em que ele fosse encaixado
+na lista errava ou essa casa ou um muro.
+
+**Como ficou** (`Render.ordemDeDesenho`):
+
+- O robô é uma pequena área no chão (±0,3 casa), comparada com a área de cada
+  casa. Casa inteira à frente → pintada depois (é parede). Inteira atrás →
+  antes.
+- Casas do passo (origem e destino): se o corpo do robô está na altura do topo
+  dela ou acima, ele está sobre ela e é pintado por cima — nunca atravessa o
+  chão. Se o topo está acima do robô *e* a casa está à frente, ela é parede
+  naquele instante. É o que faz o robô sumir aos poucos atrás da torre na
+  queda da fase 18, em vez de sumir de uma vez ao pousar.
+- A ordem final é uma ordenação topológica (Kahn): uma casa só precisa vir
+  antes de outra se as duas se sobrepõem na tela. Isso dá liberdade para o robô
+  ficar por cima da casa de onde saiu e por baixo do muro ao mesmo tempo.
+- A elevação **não** entra na profundidade: toda casa é uma coluna até o
+  chão, e uma coluna à frente continua à frente por mais alto que o robô esteja.
+
+**O pulo** (`Render.interpolar`): quando as duas casas têm alturas diferentes,
+a altura do robô segue `reta + k·4s(1−s)` — uma parábola somada à reta entre as
+alturas, com `k = 0,6 + 0,25·|desnível|`. A condição é só a diferença de altura,
+não o comando, então vale para qualquer mudança de nível em qualquer fase. A
+sombra fica no chão da casa que está debaixo do robô e encolhe enquanto ele está
+no ar.
+
+**Como foi verificado.**
+
+- No navegador, contando pixels do robô a cada quadro, em todos os passos das
+  soluções das 22 fases, nas 4 posições de câmera. O pior salto de visibilidade
+  entre quadros seguidos caiu de 100% para 11%. Os saltos que sobram são o
+  robô entrando ou saindo de trás de uma parede de forma contínua: medindo com
+  6 vezes mais quadros, eles diminuem na mesma proporção, o que um estalo não
+  faria.
+- `test/render.test.js`, sem navegador: 83 mil verificações das regras
+  acima nos mesmos passos, câmeras e 21 instantes por passo. Foi testado contra
+  o próprio erro: quebrar a regra do chão produz 42 mil falhas, e quebrar a
+  regra da parede produz 753.
+
+**O que ainda pode aparecer.** Na subida para um bloco mais alto que está à
+frente, o robô começa escondido atrás dele e aparece quando o pulo passa da
+altura do topo. Essa passagem acontece num quadro só, mas é pequena (cerca de
+7% do corpo por quadro) porque os pés estão bem na borda do bloco. É o limite do
+algoritmo do pintor (desenhar de trás para frente), que não recorta um desenho
+pela metade.
 
 ## O código de conclusão
 

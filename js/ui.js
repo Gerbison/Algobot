@@ -388,13 +388,13 @@
     const duracao = duracaoPasso();
 
     if (resultado.animacao === "mover") {
+      // O arco do pulo é decidido em Render.interpolar, só pela diferença de
+      // altura entre as casas — vale para qualquer mudança de nível.
       animacao = {
         de: antes,
         para: depois,
         inicio: performance.now(),
-        duracao: duracao * 0.85,
-        // O pulo ganha um arquinho extra para ficar claro que subiu/desceu.
-        arco: instrucao.comando === "PULAR"
+        duracao: duracao * 0.85
       };
     }
 
@@ -617,13 +617,8 @@
   /* Onde desenhar o robô neste instante. Fora de uma animação é a posição
    * exata do estado; durante, é a interpolação entre as duas casas. */
   function visualDoRobo() {
-    const alturaAtual = Motor.alturaAtual(estado);
-    const base = {
-      x: estado.robo.x,
-      y: estado.robo.y,
-      altura: alturaAtual,
-      direcao: estado.robo.direcao
-    };
+    const base = Render.parado(estado.robo.x, estado.robo.y,
+                               Motor.alturaAtual(estado), estado.robo.direcao);
 
     if (!animacao) return base;
 
@@ -633,21 +628,9 @@
       return base;
     }
 
-    // Suavização (ease-in-out) para o passo não parecer robótico demais.
-    const s = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-
-    let altura = animacao.de.altura + (animacao.para.altura - animacao.de.altura) * s;
-    if (animacao.arco) {
-      // meia senoide: sobe no meio do trajeto e volta
-      altura += Math.sin(s * Math.PI) * 0.35;
-    }
-
-    return {
-      x: animacao.de.x + (animacao.para.x - animacao.de.x) * s,
-      y: animacao.de.y + (animacao.para.y - animacao.de.y) * s,
-      altura: altura,
-      direcao: estado.robo.direcao
-    };
+    // Posição, arco do pulo e casas usadas na ordem de desenho: tudo em
+    // Render.interpolar, junto do código que desenha.
+    return Render.interpolar(animacao.de, animacao.para, t, estado.robo.direcao);
   }
 
   function lacoDeDesenho() {
