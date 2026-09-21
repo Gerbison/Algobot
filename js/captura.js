@@ -270,8 +270,47 @@ const Captura = (function () {
     return "algobot-fase-" + String(fase.id).padStart(2, "0") + "-" + limpo + "-" + data + ".png";
   }
 
+  /*
+   * Monta o link "mailto:" do botão Enviar por e-mail.
+   *
+   * Um mailto NÃO consegue anexar arquivo — é um limite de segurança de todo
+   * navegador, não deste jogo. Por isso o corpo da mensagem avisa que a
+   * imagem foi baixada e pede para anexá-la; quem chama esta função (ui.js)
+   * é responsável por disparar o download antes de abrir o e-mail.
+   *
+   *   destino   — endereço do professor (EMAIL_PROFESSOR)
+   *   fase      — fase atual
+   *   aluno     — nome digitado, pode vir vazio
+   *   resultado — { estrelas, usados } se a fase foi concluída, ou null
+   *   arquivo   — nome do PNG que foi baixado (Captura.nomeArquivo)
+   */
+  function linkEmail(destino, fase, aluno, resultado, arquivo) {
+    const situacao = resultado
+      ? "Estrelas: " + "★".repeat(resultado.estrelas) + "☆".repeat(3 - resultado.estrelas) +
+        " (" + resultado.usados + (resultado.usados === 1 ? " comando)" : " comandos)")
+      : "Ainda em andamento.";
+
+    const assunto = NOME_JOGO + " - Fase " + fase.id + " - " + (aluno || "aluno");
+
+    const corpo = [
+      "Fase " + fase.id + ": " + fase.nome,
+      "Aluno: " + (aluno || "—"),
+      situacao,
+      "",
+      "A imagem desta fase foi baixada automaticamente como \"" + arquivo + "\".",
+      "Anexe esse arquivo (pasta Downloads) antes de enviar este e-mail."
+    ].join("\n");
+
+    // O destinatário não é codificado: é só letras, pontos e "@", e alguns
+    // clientes de e-mail leem melhor sem "%40" no meio do endereço.
+    return "mailto:" + destino +
+      "?subject=" + encodeURIComponent(assunto) +
+      "&body=" + encodeURIComponent(corpo);
+  }
+
   return {
     gerar: gerar,
-    nomeArquivo: nomeArquivo
+    nomeArquivo: nomeArquivo,
+    linkEmail: linkEmail
   };
 })();

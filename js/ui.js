@@ -545,7 +545,7 @@
     // Gerar o PNG leva de meio segundo a um segundo num PC modesto. Até lá os
     // botões ficam desligados e com aviso — senão o aluno clica em "Baixar",
     // nada acontece, e parece defeito.
-    const botoesAcao = ["btn-baixar-captura", "btn-copiar-captura", "btn-compartilhar-captura"];
+    const botoesAcao = ["btn-baixar-captura", "btn-copiar-captura", "btn-email-captura", "btn-compartilhar-captura"];
     botoesAcao.forEach(function (id) { $(id).disabled = true; });
     statusCaptura("Preparando imagem…", false);
 
@@ -595,6 +595,32 @@
       .catch(function () {
         statusCaptura("O navegador não deixou copiar. Use \"Baixar imagem\".", true);
       });
+  }
+
+  /*
+   * "Enviar por e-mail": abre o e-mail do aluno com o professor já no campo
+   * "para", pronto para enviar. Um link mailto NÃO consegue anexar arquivo —
+   * é um limite de todo navegador —, então baixamos a imagem primeiro e
+   * pedimos, no corpo da mensagem, para anexá-la à mão.
+   *
+   * Funciona em qualquer navegador e até com o jogo aberto por duplo clique
+   * (file://), ao contrário de "Copiar imagem" e "Compartilhar…", que
+   * exigem o site publicado.
+   */
+  function enviarPorEmail() {
+    if (!capturaBlob) return;
+
+    const arquivo = Captura.nomeArquivo(fase, progresso.nome);
+    baixarCaptura();
+
+    const link = Captura.linkEmail(EMAIL_PROFESSOR, fase, progresso.nome, resultadoAtual, arquivo);
+    const a = document.createElement("a");
+    a.href = link;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    statusCaptura("Abrindo seu programa de e-mail. A imagem \"" + arquivo + "\" foi baixada — anexe-a antes de enviar.", false);
   }
 
   function compartilharCaptura() {
@@ -724,6 +750,7 @@
     $("btn-capturar-vitoria").addEventListener("click", abrirCaptura);
     $("btn-baixar-captura").addEventListener("click", baixarCaptura);
     $("btn-copiar-captura").addEventListener("click", copiarCaptura);
+    $("btn-email-captura").addEventListener("click", enviarPorEmail);
     $("btn-compartilhar-captura").addEventListener("click", compartilharCaptura);
 
     $("btn-dica").addEventListener("click", function () {

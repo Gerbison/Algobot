@@ -59,18 +59,30 @@ Na janela que abre, o aluno escolhe o destino:
 | Botão | O que faz | Quando aparece |
 |---|---|---|
 | **Baixar imagem** | salva o PNG na pasta Downloads | sempre |
-| **Copiar imagem** | copia para colar com Ctrl+V (WhatsApp Web, Classroom, e-mail) | só no site publicado (https) |
-| **Enviar…** | abre o menu de compartilhar do sistema | só onde o navegador permite enviar arquivo (comum no celular) |
+| **📧 Enviar por e-mail** | baixa a imagem e abre o e-mail do aluno já endereçado ao professor | sempre, em qualquer navegador — inclusive por duplo clique |
+| **📋 Copiar imagem** | copia para colar com Ctrl+V (WhatsApp Web, Classroom, e-mail) | só no site publicado (https) |
+| **Compartilhar…** | abre o menu de compartilhar do sistema | só onde o navegador permite enviar arquivo (comum no celular) |
 
-Aberto por **duplo clique** no `index.html`, o navegador bloqueia copiar e enviar
-por segurança; aí só aparece *Baixar*. No endereço do GitHub Pages os três
-funcionam, conforme o navegador.
+Aberto por **duplo clique** no `index.html`, o navegador bloqueia copiar e o
+menu de compartilhar por segurança; ali só aparecem *Baixar* e *Enviar por
+e-mail*. No endereço do GitHub Pages os quatro funcionam, conforme o navegador.
+
+**Sobre o "Enviar por e-mail":** ele abre o programa de e-mail do aluno (Gmail,
+Outlook, o app de e-mail do celular) já com o campo "para" preenchido com o
+endereço do professor, e assunto e corpo prontos com a fase, o nome do aluno e
+o resultado. **Não anexa o arquivo sozinho** — nenhum site consegue fazer isso
+por regra de segurança do navegador, não é uma limitação deste jogo. Por isso o
+botão baixa a imagem automaticamente antes de abrir o e-mail, e o corpo da
+mensagem lembra o aluno de anexá-la. Para outro professor usar o jogo, troque o
+endereço em `EMAIL_PROFESSOR`, no topo de `js/config.js`. Se o computador não
+tiver nenhum programa de e-mail configurado, nada abre — nesse caso use
+*Baixar imagem* e envie por outro canal.
 
 O arquivo sai com um nome fácil de organizar quando você recebe vários:
 `algobot-fase-05-maria-luiza-2026-09-17.png`.
 
-O jogo **não envia a imagem para lugar nenhum sozinho** — quem escolhe o destino
-é o aluno.
+O jogo **não envia nada sozinho** — o e-mail abre como rascunho, e é o aluno
+quem revisa e aperta enviar.
 
 ### Girar a vista
 

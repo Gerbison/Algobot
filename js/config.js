@@ -9,6 +9,10 @@
 const NOME_JOGO = "AlgoBot";
 const VERSAO = "1.0";
 
+// Para onde o botão "Enviar por e-mail" da captura de fase manda a mensagem.
+// Troque aqui se outro professor for usar o jogo.
+const EMAIL_PROFESSOR = "gerbison.esabino@educador.edu.es.gov.br";
+
 // Quantas chamadas de sub-rotina podem ficar empilhadas ao mesmo tempo.
 // Ao estourar esse limite assumimos que o aluno escreveu um laco infinito.
 const LIMITE_PILHA = 200;

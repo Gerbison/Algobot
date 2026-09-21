@@ -44,6 +44,7 @@ js/ui.js            a cola: DOM, arrastar/clicar, execução animada, janelas
 test/solucoes.test.js  regressão das fases, roda no Node sem navegador
 test/otimo.js       busca por força bruta o menor programa que resolve uma fase
 test/render.test.js confere a ordem de desenho e o pulo em todos os passos
+test/captura.test.js confere o link "mailto:" do botão Enviar por e-mail
 test/solucoes-conhecidas.js  a solução pretendida de cada fase (usada pelos testes)
 ```
 
@@ -229,8 +230,35 @@ Três detalhes que já deram problema e estão tratados:
   é zerado sempre que um comando entra ou sai, na troca de fase, ao limpar e ao
   executar de novo.
 
-*Copiar* e *Enviar* usam APIs que só existem em página segura (https ou
-localhost). Aberto por `file://` os botões são escondidos em vez de falhar.
+*Copiar imagem* e *Compartilhar…* usam APIs que só existem em página segura
+(https ou localhost). Aberto por `file://` esses dois botões são escondidos em
+vez de falhar.
+
+#### "Enviar por e-mail": por que não é a mesma coisa que "Compartilhar…"
+
+O botão original era só *Compartilhar…*, sobre `navigator.share` com o arquivo
+anexado. Ele funciona bem no celular, mas em desktop `navigator.canShare` quase
+sempre devolve `false` para arquivos — o botão simplesmente não aparecia no
+Chrome/Edge de PC, e foi relatado como "o botão de e-mail não funciona".
+
+A troca foi por um link `mailto:`, montado por `Captura.linkEmail()` (função
+pura, sem DOM, testada em `test/captura.test.js`). Duas coisas que valem
+registrar:
+
+- **`mailto:` não anexa arquivo.** Não é uma limitação deste código — nenhum
+  site consegue anexar um arquivo a um e-mail por segurança do navegador.
+  A solução foi baixar o PNG automaticamente antes de abrir o e-mail, e o
+  corpo da mensagem lembra o aluno de anexar o arquivo baixado, citando o nome
+  exato dele.
+- **O endereço do destinatário não é passado por `encodeURIComponent`.**
+  Só o assunto e o corpo são codificados; o endereço vai puro no `mailto:`,
+  porque um `%40` no lugar do `@` confunde alguns clientes de e-mail mais
+  antigos.
+
+`EMAIL_PROFESSOR`, em `js/config.js`, é o único lugar a mudar para outro
+professor usar o jogo. `Compartilhar…` continua existindo como opção extra —
+só aparece quando o navegador realmente suporta enviar arquivo, o que é comum
+no celular.
 
 ### 7. As 22 fases e a calibragem das estrelas
 
