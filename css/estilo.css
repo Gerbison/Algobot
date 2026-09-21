@@ -875,3 +875,23 @@ body.guia-recolhido .guia-aba { display: block; }
 }
 .cartao-fase .nivel-cartao[data-nivel="intermediário"] { color: #ffd447; }
 .cartao-fase .nivel-cartao[data-nivel="difícil"] { color: #ff9fae; }
+
+/* ------------------------------------------------- identificação (fases) -- */
+
+/* Aparece no rodapé da lista de fases: é o que o print mandado ao professor
+ * mostra, então nome e código precisam ser legíveis sem zoom. */
+.identificacao-fases {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #24354f;
+  font-size: 13px;
+  color: #b9c9dd;
+}
+
+.identificacao-fases strong {
+  color: #ffd447;
+  font-weight: 700;
+}

@@ -695,6 +695,10 @@
     const lista = $("lista-fases");
     lista.innerHTML = "";
 
+    // Identificação visível no print que o aluno manda ao professor.
+    $("nome-jogador-fases").textContent = progresso.nome || "—";
+    $("codigo-jogador-fases").textContent = Estrelas.gerarCodigo(progresso, FASES);
+
     FASES.forEach(function (f, i) {
       const registro = progresso.fases[f.id];
       const liberada = f.id <= progresso.faseMaxima;

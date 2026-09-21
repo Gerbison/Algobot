@@ -113,6 +113,14 @@
   <div id="janela-fases" class="janela oculto">
     <h2>Escolha a fase</h2>
     <div id="lista-fases" class="lista-fases"></div>
+
+    <!-- Quem é o aluno desta tela: aparece no print que ele manda para o
+         professor, então precisa estar visível sem precisar abrir outra janela. -->
+    <div class="identificacao-fases">
+      <span>Jogador: <strong id="nome-jogador-fases">—</strong></span>
+      <span>Código: <strong id="codigo-jogador-fases">—</strong></span>
+    </div>
+
     <div class="janela-acoes">
       <button id="btn-apagar-progresso" class="botao botao-perigo">Apagar meu progresso</button>
       <button class="botao fechar-janela">Fechar</button>

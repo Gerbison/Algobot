@@ -139,6 +139,14 @@ apresentar função e laço.
 O que conta é **quantos comandos foram escritos**, não quantas vezes eles
 rodaram. É isso que premia quem descobre a sub-rotina.
 
+### A tela "Escolha a fase"
+
+O botão **Fases**, no cabeçalho, mostra todas as fases com as estrelas
+conquistadas. No rodapé dessa tela aparecem **"Jogador"** e **"Código"** — o
+nome digitado e o código de conclusão, os dois sempre visíveis, sem precisar
+abrir outra janela. É de propósito: quando o aluno tira um print dessa tela
+para mandar ao professor, dá para saber de quem é sem precisar perguntar.
+
 ## As fases
 
 São **22 fases**, em três níveis. O nível aparece no topo da tela e na lista de
