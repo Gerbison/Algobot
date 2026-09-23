@@ -352,7 +352,7 @@ altura do topo. Essa passagem acontece num quadro só, mas é pequena (cerca de
 algoritmo do pintor (desenhar de trás para frente), que não recorta um desenho
 pela metade.
 
-## O código de conclusão
+### 9. O código de conclusão também é o "save" entre computadores
 
 Formato: `ALG-XXXXX-XXXX`.
 
@@ -363,15 +363,100 @@ Formato: `ALG-XXXXX-XXXX`.
 O alfabeto base32 não tem `I`, `L`, `O` nem `U`, para o aluno não confundir
 `1`/`I` e `0`/`O` ao ditar o código em voz alta.
 
-**O nome não volta a partir do código** — ele é curto demais para isso. O que o
-painel do professor consegue fazer é *conferir* se um nome que ele já tem na
-lista de chamada bate com o código, o que resolve o problema real: impedir que
-um aluno entregue o código do colega. A função `Estrelas.conferirNome()` já
-está pronta para a Entrega 3.
+**O nome não volta a partir do código** — ele é curto demais para isso. O que
+dá para fazer é *conferir* se um nome digitado bate com o código
+(`Estrelas.conferirNome()`), o que resolve o problema real: impedir que um
+aluno use o código do colega para pular fases. Isso também serve para o painel
+do professor da Entrega 3, quando existir.
 
 **Pegadinha conhecida:** o preenchimento com zeros no fim pode fazer o código
-devolver até duas fases a mais do que existiam, sempre com 0 estrelas. O painel
-do professor precisa cortar a lista no total de fases que ele conhece.
+devolver até duas fases a mais do que existiam, sempre com 0 estrelas.
+`Estrelas.restaurarProgresso()` já corta a lista no tamanho de `FASES`, então
+isso não vaza para quem usa a função — é só quem lê `decodificarCodigo()`
+direto que precisa lembrar disso (o painel do professor da Entrega 3, quando
+existir).
+
+**Continuar em outro computador sem banco de dados.** O projeto não tem
+servidor nem orçamento para um, e as máquinas da escola bloqueiam instalar
+dependência — então o "save na nuvem" não podia depender de nenhum dos dois. A
+saída foi: o código **já** carregava o progresso inteiro (só faltava lê-lo de
+volta). `Estrelas.restaurarProgresso(codigo, nomeDigitado, FASES)`:
+
+1. decodifica e confere o nome, como sempre;
+2. para cada fase com estrelas > 0, reconstrói `{ estrelas, comandos }` — o
+   número de comandos não vem no código (só a contagem de estrelas), então
+   usamos o **maior valor que ainda garante aquela quantidade de estrelas**
+   (`fase.estrelas.tres` para 3 estrelas, `fase.estrelas.duas` para 2, um a
+   mais que isso para 1). Se o aluno um dia refizer a fase melhor,
+   `Storage.registrarConclusao` troca pelo valor real, como já fazia;
+3. devolve `{ nome, faseMaxima, fases }` pronto para entrar no `progresso`.
+
+`ui.js` (`importarCodigo`) não sobrescreve o progresso local: para cada fase do
+código, chama `Storage.registrarConclusao`, que já sabia manter o melhor
+resultado entre dois. Importar duas vezes, ou importar um código mais velho por
+engano, nunca faz o aluno perder estrelas.
+
+**Duas entradas na interface**, porque o momento em que o aluno percebe que
+precisa disso é diferente:
+
+- **`janela-nome`** (tela de boas-vindas, `localStorage` vazio): "Já jogou em
+  outro computador?" revela o campo de código. Precisa pedir o nome também,
+  porque ainda não existe nenhum salvo.
+- **`janela-fases`**: "📥 Importar código de outro computador", só pede o
+  código — o nome já é `progresso.nome`, que essa tela só é alcançável tendo
+  digitado.
+
+Os dois chamam a mesma função (`importarCodigo`), então não há duas
+implementações do mesmo merge para manter sincronizadas.
+
+**Acento no nome.** `hashNome()` agora tira acento antes de comparar
+(`normalize("NFD")` + remover os diacríticos) — "Luíza" e "Luiza" geram o mesmo
+hash. Antes disso o hash era sensível a acento, mas nada consumia códigos como
+entrada (só "Meu código" gerava, ninguém lia de volta), então mudar o hash
+agora não quebra nenhum código já em uso. Sem isso, um aluno que digitasse o
+nome sem o til da segunda vez (teclado diferente, pressa, autocorretor) ficaria
+trancado para fora do próprio progresso — pior que não ter a função.
+
+### 10. "Salvar e continuar depois" e o Gmail como padrão de e-mail
+
+Botão dentro de `janela-codigo`, ao lado do código: manda o código para o
+**e-mail do próprio aluno** (diferente de "Enviar por e-mail" da captura, que
+vai para o professor). Pede o e-mail uma vez, guarda em
+`Storage.salvarPreferencia("emailAlunoContinuar", ...)` — preferência de tela,
+não dado do progresso, para não ir dentro do código nem do print.
+
+`Estrelas.linkContinuar` / `linkContinuarGmail` seguem exatamente o mesmo
+padrão de `Captura.linkEmail` / `linkEmailGmail` (abaixo).
+
+**Por que Gmail e não `mailto:` como padrão.** O botão de e-mail da captura já
+existia usando só `mailto:`, e o retorno de uso real foi que em desktop "nada
+parecia acontecer" — a imagem baixava, mas o e-mail não abria. Causa: `mailto:`
+só funciona se a máquina tiver um programa de e-mail **registrado como
+handler** do protocolo, e em muito PC de escola, com Chrome mas sem Outlook
+configurado, não há nenhum — o clique não navega e não dá erro, só não faz
+nada visível. Em Chromebook funciona, porque o ChromeOS já vem com o Gmail
+registrado para isso.
+
+A correção não foi tentar registrar um handler (`navigator.registerProtocolHandler`
+pede permissão do usuário e só vale para o próprio site) — foi trocar o padrão
+para o link de **compose do Gmail na web**
+(`https://mail.google.com/mail/?view=cm&fs=1&to=...&su=...&body=...`), que é
+uma URL `https:` comum: sempre abre, em qualquer navegador com internet, sem
+depender de handler nenhum. É uma aposta consciente no que a escola já usa
+(Chromebook, contas `@...gov.br` em Google Workspace são comuns em rede
+estadual), não uma trava — o link "Não usa Gmail?"/"Usar outro programa de
+e-mail" continua oferecendo o `mailto:` de antes para quem não usa Gmail.
+
+`captura.js` e `estrelas.js` cada um ganhou um `partesEmail`/`partesContinuar`
+interno que monta `{ assunto, corpo }` uma vez só; `linkEmail`/`linkContinuar`
+(mailto) e `linkEmailGmail`/`linkContinuarGmail` só formatam esse mesmo
+conteúdo em dois formatos de URL. Evita ter a mensagem escrita em dois lugares
+que podem divergir.
+
+`ui.js` decide `target="_blank"` olhando o próprio link: `https:` (Gmail) abre
+aba nova, porque senão o jogo sumiria atrás dele; `mailto:` não pode, porque
+isso deixaria uma aba em branco esperando um programa de e-mail que, na
+máquina sem handler, nunca vem.
 
 ## Onde isso pode te morder depois
 
@@ -390,6 +475,14 @@ do professor precisa cortar a lista no total de fases que ele conhece.
 - **Nomes de identificadores em português com acento** existem em textos, mas
   não em nomes de variáveis. Evite criar novos com acento: alguns editores e
   ferramentas antigas ainda tropeçam.
+- **`restaurarProgresso` nunca reduz `faseMaxima`.** `importarCodigo` só
+  aumenta (`if (resultado.progresso.faseMaxima > progresso.faseMaxima)`).
+  Um código antigo, de antes de um progresso mais recente na própria máquina,
+  não desbloqueia menos fases do que já existiam.
+- **O e-mail do aluno (`emailAlunoContinuar`) fica só naquele navegador,** em
+  texto puro no `localStorage`, igual às outras preferências de tela. Não é
+  enviado a lugar nenhum pelo jogo — só entra no `mailto:`/Gmail que o próprio
+  aluno abre e decide mandar.
 
 ## O que ficou de fora, de propósito
 

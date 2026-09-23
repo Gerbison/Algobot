@@ -545,7 +545,7 @@
     // Gerar o PNG leva de meio segundo a um segundo num PC modesto. Até lá os
     // botões ficam desligados e com aviso — senão o aluno clica em "Baixar",
     // nada acontece, e parece defeito.
-    const botoesAcao = ["btn-baixar-captura", "btn-copiar-captura", "btn-email-captura", "btn-compartilhar-captura"];
+    const botoesAcao = ["btn-baixar-captura", "btn-copiar-captura", "btn-email-captura", "btn-email-captura-outro", "btn-compartilhar-captura"];
     botoesAcao.forEach(function (id) { $(id).disabled = true; });
     statusCaptura("Preparando imagem…", false);
 
@@ -607,20 +607,45 @@
    * (file://), ao contrário de "Copiar imagem" e "Compartilhar…", que
    * exigem o site publicado.
    */
-  function enviarPorEmail() {
+  /*
+   * Abre um link num clique sintético de <a>. O Gmail (https) abre numa aba
+   * nova, para o jogo não sumir de trás dele; um mailto: NÃO pode usar aba
+   * nova — isso deixaria uma aba em branco esperando um programa de e-mail
+   * que, em muito PC de escola, não existe.
+   */
+  function abrirLink(link) {
+    const a = document.createElement("a");
+    a.href = link;
+    if (link.indexOf("https:") === 0) {
+      a.target = "_blank";
+      a.rel = "noopener";
+    }
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  /*
+   * viaGmail = true  → Gmail na web (padrão): não depende de programa
+   *                    instalado, só de internet. Bate com o ecossistema da
+   *                    escola (Chromebook).
+   * viaGmail = false → mailto: (link "Não usa Gmail?"): funciona em qualquer
+   *                    navegador, mas só abre algo se houver programa de
+   *                    e-mail configurado na máquina — em muito PC de escola
+   *                    não há nenhum, e por isso não é mais a opção padrão.
+   */
+  function enviarPorEmail(viaGmail) {
     if (!capturaBlob) return;
 
     const arquivo = Captura.nomeArquivo(fase, progresso.nome);
     baixarCaptura();
 
-    const link = Captura.linkEmail(EMAIL_PROFESSOR, fase, progresso.nome, resultadoAtual, arquivo);
-    const a = document.createElement("a");
-    a.href = link;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    const link = viaGmail
+      ? Captura.linkEmailGmail(EMAIL_PROFESSOR, fase, progresso.nome, resultadoAtual, arquivo)
+      : Captura.linkEmail(EMAIL_PROFESSOR, fase, progresso.nome, resultadoAtual, arquivo);
+    abrirLink(link);
 
-    statusCaptura("Abrindo seu programa de e-mail. A imagem \"" + arquivo + "\" foi baixada — anexe-a antes de enviar.", false);
+    statusCaptura("Abrindo o e-mail. A imagem \"" + arquivo + "\" foi baixada — anexe-a antes de enviar.", false);
   }
 
   function compartilharCaptura() {
@@ -754,7 +779,8 @@
     $("btn-capturar-vitoria").addEventListener("click", abrirCaptura);
     $("btn-baixar-captura").addEventListener("click", baixarCaptura);
     $("btn-copiar-captura").addEventListener("click", copiarCaptura);
-    $("btn-email-captura").addEventListener("click", enviarPorEmail);
+    $("btn-email-captura").addEventListener("click", function () { enviarPorEmail(true); });
+    $("btn-email-captura-outro").addEventListener("click", function () { enviarPorEmail(false); });
     $("btn-compartilhar-captura").addEventListener("click", compartilharCaptura);
 
     $("btn-dica").addEventListener("click", function () {
@@ -769,12 +795,99 @@
 
     $("btn-fases").addEventListener("click", function () {
       montarListaFases();
+      $("bloco-importar-fases").classList.add("oculto");
+      $("campo-importar-fases").value = "";
+      statusElemento("status-importar-fases", "", false);
       abrirJanela("janela-fases");
     });
 
     $("btn-codigo").addEventListener("click", function () {
       $("texto-codigo").textContent = Estrelas.gerarCodigo(progresso, FASES);
+      $("campo-email-aluno").value = Storage.lerPreferencia("emailAlunoContinuar", "");
+      statusElemento("status-salvar-continuar", "", false);
       abrirJanela("janela-codigo");
+    });
+
+    /* "Salvar e continuar depois": manda o código de conclusão para o
+     * próprio e-mail do aluno. Diferente de "Enviar por e-mail" da captura,
+     * que vai para o professor. */
+    function salvarContinuarDepois(viaGmail) {
+      const email = $("campo-email-aluno").value.trim();
+      if (!email) {
+        statusElemento("status-salvar-continuar", "Digite o seu e-mail primeiro.", true);
+        $("campo-email-aluno").focus();
+        return;
+      }
+
+      Storage.salvarPreferencia("emailAlunoContinuar", email);
+
+      const codigo = Estrelas.gerarCodigo(progresso, FASES);
+      const link = viaGmail
+        ? Estrelas.linkContinuarGmail(email, codigo, progresso.nome)
+        : Estrelas.linkContinuar(email, codigo, progresso.nome);
+      abrirLink(link);
+
+      statusElemento("status-salvar-continuar", "Abrindo o e-mail para " + email + ".", false);
+    }
+
+    $("btn-salvar-continuar").addEventListener("click", function () { salvarContinuarDepois(true); });
+    $("btn-salvar-continuar-outro").addEventListener("click", function () { salvarContinuarDepois(false); });
+
+    /* "Já jogou em outro computador?": revela o campo de código na tela de
+     * boas-vindas, para quem está chegando numa máquina nova. */
+    $("btn-mostrar-codigo-nome").addEventListener("click", function () {
+      $("bloco-codigo-nome").classList.toggle("oculto");
+      $("campo-codigo-nome").focus();
+    });
+
+    $("btn-continuar-codigo").addEventListener("click", function () {
+      const nome = $("campo-nome").value.trim();
+      const codigo = $("campo-codigo-nome").value.trim();
+
+      if (!nome) {
+        statusElemento("status-codigo-nome", "Digite seu nome ali em cima primeiro.", true);
+        $("campo-nome").focus();
+        return;
+      }
+      if (!codigo) {
+        statusElemento("status-codigo-nome", "Cole o código que você recebeu.", true);
+        return;
+      }
+
+      const resultado = importarCodigo(codigo, nome);
+      if (!resultado.ok) {
+        statusElemento("status-codigo-nome", resultado.motivo, true);
+        return;
+      }
+
+      $("nome-aluno").textContent = progresso.nome;
+      fecharJanelas();
+      irParaFaseDoProgresso();
+    });
+
+    /* Mesma ideia, mas para quem já está jogando nesta máquina e quer trazer
+     * progresso de outra — não precisa redigitar o nome, já está salvo. */
+    $("btn-mostrar-importar-fases").addEventListener("click", function () {
+      $("bloco-importar-fases").classList.toggle("oculto");
+      $("campo-importar-fases").focus();
+    });
+
+    $("btn-importar-fases").addEventListener("click", function () {
+      const codigo = $("campo-importar-fases").value.trim();
+      if (!codigo) {
+        statusElemento("status-importar-fases", "Cole o código que você recebeu.", true);
+        return;
+      }
+
+      const resultado = importarCodigo(codigo, progresso.nome);
+      if (!resultado.ok) {
+        statusElemento("status-importar-fases", resultado.motivo, true);
+        return;
+      }
+
+      $("campo-importar-fases").value = "";
+      statusElemento("status-importar-fases", "Progresso trazido! Suas estrelas foram atualizadas.", false);
+      montarListaFases();
     });
 
     $("btn-proxima").addEventListener("click", function () {
@@ -836,6 +949,9 @@
 
   function pedirNome() {
     $("campo-nome").value = progresso.nome || "";
+    $("bloco-codigo-nome").classList.add("oculto");
+    $("campo-codigo-nome").value = "";
+    statusElemento("status-codigo-nome", "", false);
     abrirJanela("janela-nome");
     setTimeout(function () { $("campo-nome").focus(); }, 50);
   }
@@ -850,6 +966,51 @@
     Storage.salvarProgresso(progresso);
     $("nome-aluno").textContent = nome;
     fecharJanelas();
+  }
+
+  /* Escreve numa das linhas de status espalhadas pelas janelas (a mesma
+   * classe visual de statusCaptura, aqui reaproveitada por nome de elemento
+   * em vez de sempre "status-captura"). */
+  function statusElemento(id, texto, erro) {
+    const el = $(id);
+    el.textContent = texto;
+    el.classList.toggle("erro", !!erro);
+  }
+
+  /*
+   * Traz um código de outro computador para cá. Não apaga o que já existe
+   * nesta máquina: cada fase fica com o MELHOR resultado entre o daqui e o
+   * do código (mesma regra de Storage.registrarConclusao), então importar
+   * duas vezes ou na ordem errada nunca faz o aluno perder estrelas.
+   *
+   * Devolve { ok: true } ou { ok: false, motivo }, para quem chamou decidir
+   * o que fazer com a tela.
+   */
+  function importarCodigo(codigo, nome) {
+    const resultado = Estrelas.restaurarProgresso(codigo, nome, FASES);
+    if (!resultado.ok) return resultado;
+
+    progresso.nome = resultado.progresso.nome;
+    Object.keys(resultado.progresso.fases).forEach(function (id) {
+      const r = resultado.progresso.fases[id];
+      progresso = Storage.registrarConclusao(progresso, Number(id), r.estrelas, r.comandos);
+    });
+    if (resultado.progresso.faseMaxima > progresso.faseMaxima) {
+      progresso.faseMaxima = resultado.progresso.faseMaxima;
+      Storage.salvarProgresso(progresso);
+    }
+
+    return { ok: true };
+  }
+
+  /* Abre na fase certa para o progresso atual — usado ao iniciar o jogo e
+   * de novo depois de importar um código, que pode ter avançado o aluno. */
+  function irParaFaseDoProgresso() {
+    let alvo = FASES.findIndex(function (f) { return f.id === progresso.faseMaxima; });
+    if (alvo < 0) {
+      alvo = progresso.faseMaxima > 1 ? FASES.length - 1 : 0;
+    }
+    carregarFase(alvo);
   }
 
   /* ----------------------------------------------------------- partida -- */
@@ -870,11 +1031,7 @@
     // Retoma na maior fase liberada, para o aluno não ter que procurar.
     // Quem já terminou tudo (faseMaxima passa do último id) volta na última
     // fase, e não na primeira.
-    let alvo = FASES.findIndex(function (f) { return f.id === progresso.faseMaxima; });
-    if (alvo < 0) {
-      alvo = progresso.faseMaxima > 1 ? FASES.length - 1 : 0;
-    }
-    carregarFase(alvo);
+    irParaFaseDoProgresso();
 
     lacoDeDesenho();
 

@@ -1,16 +1,17 @@
 /*
  * estrelas.js — pontuação e código de conclusão.
  *
- * Duas coisas moram aqui:
+ * Três coisas moram aqui:
  *   1) quantas estrelas a solução do aluno vale;
- *   2) o código curto (ALG-XXXX-XXXX) que o aluno me entrega quando jogou
- *      sem internet.
+ *   2) o código curto (ALG-XXXX-XXXX) que carrega o progresso inteiro;
+ *   3) ler esse código de volta — é assim que o jogo salva progresso "sem
+ *      banco de dados": o código É o save, e cabe numa mensagem de texto.
  *
  * Sobre o código: ele carrega as ESTRELAS de cada fase, em ordem, e um
  * resumo (hash) do nome digitado. O nome NÃO volta a partir do código —
- * ele é curto demais para isso. O que o painel do professor consegue fazer
- * é conferir se um nome que ele já tem na lista bate com o código, o que
- * resolve o problema real: impedir que um aluno passe o código do colega.
+ * ele é curto demais para isso. O que dá para fazer é CONFERIR se um nome
+ * digitado bate com o código, o que resolve o problema real: impedir que
+ * um aluno use o código do colega para pular fases.
  */
 
 const Estrelas = (function () {
@@ -26,9 +27,16 @@ const Estrelas = (function () {
   }
 
   /* Hash FNV-1a de 32 bits. Não é criptografia — é só para amarrar o código
-   * ao nome. Determinístico e igual no jogo e no painel do professor. */
+   * ao nome. Determinístico e igual em qualquer computador.
+   *
+   * Tira acento antes de comparar ("Luíza" e "Luiza" batem): o aluno pode
+   * digitar o nome de um jeito num computador e de outro jeito no seguinte
+   * (teclado sem acento, autocorretor, pressa), e isso não pode impedir de
+   * continuar o próprio progresso. */
   function hashNome(nome) {
-    const limpo = String(nome || "").trim().toUpperCase();
+    const limpo = String(nome || "").trim()
+      .normalize("NFD").replace(/[̀-ͯ]/g, "")
+      .toUpperCase();
     let h = 0x811c9dc5;
     for (let i = 0; i < limpo.length; i++) {
       h = h ^ limpo.charCodeAt(i);
@@ -119,11 +127,100 @@ const Estrelas = (function () {
     return lido.assinatura === esperada;
   }
 
+  /*
+   * Reconstrói um progresso a partir de um código — o "continuar em outro
+   * computador" sem banco de dados nenhum: o código carrega tudo que é
+   * preciso, e o localStorage da máquina nova recebe uma cópia.
+   *
+   * Devolve:
+   *   { ok: true,  progresso: { nome, faseMaxima, fases } }
+   *   { ok: false, motivo: "..." }
+   *
+   * O número de comandos de cada fase não vem no código (só a quantidade de
+   * estrelas — ver o comentário de gerarCodigo). Para não inventar um valor
+   * errado, reconstituímos o MAIOR número de comandos que ainda garante
+   * aquela quantidade de estrelas; se o aluno um dia refizer a fase melhor,
+   * Storage.registrarConclusao troca pelo valor real, como já faz sempre.
+   */
+  function restaurarProgresso(codigo, nomeDigitado, listaFases) {
+    const nome = String(nomeDigitado || "").trim();
+    if (!nome) {
+      return { ok: false, motivo: "Digite o nome antes de continuar." };
+    }
+
+    const lido = decodificarCodigo(codigo);
+    if (!lido.valido) {
+      return { ok: false, motivo: lido.motivo };
+    }
+    if (!conferirNome(codigo, nome)) {
+      return {
+        ok: false,
+        motivo: "Esse código não confere com esse nome. Digite o nome exatamente como da vez passada."
+      };
+    }
+
+    const fases = {};
+    let faseMaxima = 1;
+
+    listaFases.forEach(function (f, i) {
+      const e = lido.estrelas[i] || 0;
+      if (e <= 0) return;
+
+      const comandos = e >= 3 ? f.estrelas.tres : e === 2 ? f.estrelas.duas : f.estrelas.duas + 1;
+      fases[f.id] = { estrelas: e, comandos: comandos };
+      if (f.id + 1 > faseMaxima) faseMaxima = f.id + 1;
+    });
+
+    return { ok: true, progresso: { nome: nome, faseMaxima: faseMaxima, fases: fases } };
+  }
+
+  /* ------------------------------------- "salvar e continuar depois" -- */
+
+  /*
+   * Texto do e-mail que o aluno manda para si mesmo, para continuar em
+   * outro computador. Separado de gerarCodigo: aqui o destino é o próprio
+   * aluno, não o professor, e o corpo explica como usar o código de volta.
+   */
+  function partesContinuar(codigo, nome) {
+    const assunto = NOME_JOGO + " — meu código para continuar depois";
+    const corpo = [
+      "Guarde este e-mail. Ele tem o código para continuar de onde você parou",
+      "no " + NOME_JOGO + ", em qualquer computador.",
+      "",
+      "Nome usado no jogo: " + (nome || "—"),
+      "Código: " + codigo,
+      "",
+      "Para continuar: abra o " + NOME_JOGO + ", clique em \"Já jogou em outro",
+      "computador?\", digite o nome EXATAMENTE como está acima e cole este código."
+    ].join("\n");
+    return { assunto: assunto, corpo: corpo };
+  }
+
+  /* mailto — funciona em qualquer navegador, mas depende de haver um
+   * programa de e-mail configurado na máquina. */
+  function linkContinuar(destino, codigo, nome) {
+    const p = partesContinuar(codigo, nome);
+    return "mailto:" + destino +
+      "?subject=" + encodeURIComponent(p.assunto) +
+      "&body=" + encodeURIComponent(p.corpo);
+  }
+
+  /* Gmail na web — não depende de programa nenhum instalado, só de internet.
+   * É a opção padrão porque bate com o ecossistema da escola (Chromebook). */
+  function linkContinuarGmail(destino, codigo, nome) {
+    const p = partesContinuar(codigo, nome);
+    return "https://mail.google.com/mail/?view=cm&fs=1&to=" + encodeURIComponent(destino) +
+      "&su=" + encodeURIComponent(p.assunto) + "&body=" + encodeURIComponent(p.corpo);
+  }
+
   return {
     calcular: calcular,
     gerarCodigo: gerarCodigo,
     decodificarCodigo: decodificarCodigo,
     conferirNome: conferirNome,
-    hashNome: hashNome
+    hashNome: hashNome,
+    restaurarProgresso: restaurarProgresso,
+    linkContinuar: linkContinuar,
+    linkContinuarGmail: linkContinuarGmail
   };
 })();

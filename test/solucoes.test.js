@@ -160,6 +160,83 @@ try {
 }
 
 /* --------------------------------------------------------------------------
+ * Hash do nome ignora acento: "Luíza" e "Luiza" precisam gerar o mesmo
+ * código, senão o aluno perde o progresso por causa de um til.
+ * ------------------------------------------------------------------------ */
+
+function testarCodigo(titulo, fn) {
+  try {
+    fn();
+    console.log("  ok   " + titulo);
+  } catch (erro) {
+    falhas++;
+    console.error("  FALHA " + titulo + ": " + erro.message);
+  }
+}
+
+testarCodigo("nome com e sem acento geram o mesmo hash", function () {
+  assert.strictEqual(Estrelas.hashNome("Luíza"), Estrelas.hashNome("Luiza"));
+  assert.strictEqual(Estrelas.hashNome("joão"), Estrelas.hashNome("JOAO"));
+});
+
+/* --------------------------------------------------------------------------
+ * restaurarProgresso: o "continuar em outro computador" sem banco de dados.
+ * ------------------------------------------------------------------------ */
+
+testarCodigo("restaurarProgresso recusa nome que não bate", function () {
+  const progresso = { nome: "Maria Silva", faseMaxima: 3, fases: { 1: { estrelas: 3, comandos: 3 } } };
+  const codigo = Estrelas.gerarCodigo(progresso, FASES);
+
+  const r = Estrelas.restaurarProgresso(codigo, "João", FASES);
+  assert.strictEqual(r.ok, false, "não pode aceitar o código de outra pessoa");
+  assert.ok(/nome/i.test(r.motivo), "o motivo deveria falar do nome; veio: " + r.motivo);
+});
+
+testarCodigo("restaurarProgresso recusa código vazio ou mal formado", function () {
+  assert.strictEqual(Estrelas.restaurarProgresso("", "Maria", FASES).ok, false);
+  assert.strictEqual(Estrelas.restaurarProgresso("XYZ-1-2", "Maria", FASES).ok, false);
+});
+
+testarCodigo("restaurarProgresso exige um nome digitado", function () {
+  const codigo = Estrelas.gerarCodigo({ nome: "Ana", faseMaxima: 1, fases: {} }, FASES);
+  const r = Estrelas.restaurarProgresso(codigo, "", FASES);
+  assert.strictEqual(r.ok, false);
+});
+
+testarCodigo("restaurarProgresso reconstrói estrelas, faseMaxima e ignora acento", function () {
+  const progresso = { nome: "Maria Luíza", faseMaxima: 5, fases: {} };
+  progresso.fases[1] = { estrelas: 3, comandos: 3 };
+  progresso.fases[3] = { estrelas: 2, comandos: 20 };
+  const codigo = Estrelas.gerarCodigo(progresso, FASES);
+
+  // digitado sem acento e em minúsculas — tem que bater do mesmo jeito
+  const r = Estrelas.restaurarProgresso(codigo, "maria luiza", FASES);
+  assert.strictEqual(r.ok, true, r.motivo);
+  assert.strictEqual(r.progresso.fases[1].estrelas, 3);
+  assert.strictEqual(r.progresso.fases[3].estrelas, 2);
+  assert.ok(!r.progresso.fases[2], "fase 2 não tinha registro e não pode aparecer");
+  assert.strictEqual(r.progresso.faseMaxima, 4, "faseMaxima devia ser a maior fase feita (3) + 1");
+
+  // o número de comandos reconstruído precisa continuar valendo a mesma
+  // quantidade de estrelas quando recalculado
+  const f3 = FASES.find(function (f) { return f.id === 3; });
+  assert.strictEqual(Estrelas.calcular(f3, r.progresso.fases[3].comandos), 2);
+});
+
+testarCodigo("linkContinuar e linkContinuarGmail levam o código e o nome", function () {
+  const mailto = Estrelas.linkContinuar("aluno@exemplo.com", "ALG-ABC-DEF", "Maria Luíza");
+  assert.strictEqual(mailto.indexOf("mailto:aluno@exemplo.com?"), 0);
+  const corpoMailto = decodeURIComponent(mailto);
+  assert.ok(corpoMailto.indexOf("ALG-ABC-DEF") >= 0, "o código precisa estar no corpo do e-mail");
+  assert.ok(corpoMailto.indexOf("Maria Luíza") >= 0, "o nome precisa estar no corpo do e-mail");
+
+  const gmail = Estrelas.linkContinuarGmail("aluno@exemplo.com", "ALG-ABC-DEF", "Maria Luíza");
+  assert.strictEqual(gmail.indexOf("https://mail.google.com/mail/?view=cm&fs=1&to=aluno%40exemplo.com"), 0);
+  const corpoGmail = decodeURIComponent(gmail);
+  assert.ok(corpoGmail.indexOf("ALG-ABC-DEF") >= 0);
+});
+
+/* --------------------------------------------------------------------------
  * Teste do limite de pilha: um laço infinito precisa parar, não travar.
  * ------------------------------------------------------------------------ */
 
@@ -182,17 +259,9 @@ try {
 
 /* --------------------------------------------------------------------------
  * Revisão em TypeScript: o texto e o código mostrados ao concluir a fase.
+ * (testarCodigo já foi declarado mais acima, nos testes do código de
+ * conclusão — mesma função, reaproveitada aqui.)
  * ------------------------------------------------------------------------ */
-
-function testarCodigo(titulo, fn) {
-  try {
-    fn();
-    console.log("  ok   " + titulo);
-  } catch (erro) {
-    falhas++;
-    console.error("  FALHA " + titulo + ": " + erro.message);
-  }
-}
 
 testarCodigo("sequência direta não inventa alternativa", function () {
   const analise = Codigo.analisar({ principal: [A, A, L], f1: [], f2: [] });

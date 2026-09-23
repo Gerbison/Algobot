@@ -105,8 +105,20 @@
     <h2>Bem-vindo ao <span class="destaque" id="nome-jogo-boas-vindas">AlgoBot</span></h2>
     <p>Digite seu nome ou apelido. Ele fica guardado só neste computador.</p>
     <input id="campo-nome" class="campo" maxlength="24" placeholder="Seu nome">
+
+    <!-- Continuar em outro computador: sem banco de dados nenhum, o "save" é
+         o próprio código que o botão "Salvar e continuar depois" gera. -->
+    <p class="alternativa-toggle">
+      <button type="button" id="btn-mostrar-codigo-nome" class="link-botao">Já jogou em outro computador?</button>
+    </p>
+    <div id="bloco-codigo-nome" class="bloco-codigo oculto">
+      <input id="campo-codigo-nome" class="campo" placeholder="ALG-XXXXX-XXXX" autocomplete="off">
+      <button id="btn-continuar-codigo" class="botao">Continuar de onde parei</button>
+      <p id="status-codigo-nome" class="status-captura"></p>
+    </div>
+
     <div class="janela-acoes">
-      <button id="btn-confirmar-nome" class="botao botao-primario">Começar</button>
+      <button id="btn-confirmar-nome" class="botao botao-primario">Começar do zero</button>
     </div>
   </div>
 
@@ -119,6 +131,18 @@
     <div class="identificacao-fases">
       <span>Jogador: <strong id="nome-jogador-fases">—</strong></span>
       <span>Código: <strong id="codigo-jogador-fases">—</strong></span>
+    </div>
+
+    <!-- Traz progresso de outro computador sem apagar o daqui: o melhor
+         resultado de cada fase, do que já estava e do que veio no código,
+         fica valendo (mesma regra de Storage.registrarConclusao). -->
+    <p class="alternativa-toggle">
+      <button type="button" id="btn-mostrar-importar-fases" class="link-botao">📥 Importar código de outro computador</button>
+    </p>
+    <div id="bloco-importar-fases" class="bloco-codigo oculto">
+      <input id="campo-importar-fases" class="campo" placeholder="ALG-XXXXX-XXXX" autocomplete="off">
+      <button id="btn-importar-fases" class="botao">Importar</button>
+      <p id="status-importar-fases" class="status-captura"></p>
     </div>
 
     <div class="janela-acoes">
@@ -157,8 +181,23 @@
 
   <div id="janela-codigo" class="janela oculto">
     <h2>Código de conclusão</h2>
-    <p>Passe este código para o professor caso você tenha jogado sem internet.</p>
+    <p>Esse código carrega todo o seu progresso. Serve para dar ao professor caso
+       você tenha jogado sem internet, ou para continuar num outro computador.</p>
     <div id="texto-codigo" class="codigo"></div>
+
+    <div class="bloco-salvar-depois">
+      <p class="revisao-titulo">Salvar para continuar depois</p>
+      <p class="ajuda">Manda este código para o seu próprio e-mail, para colar em
+         qualquer computador mais tarde.</p>
+      <input id="campo-email-aluno" class="campo" type="email"
+             placeholder="seu-email@exemplo.com" autocomplete="email">
+      <div class="linha-controles">
+        <button id="btn-salvar-continuar" class="botao botao-primario">💾 Salvar e continuar depois</button>
+        <button type="button" id="btn-salvar-continuar-outro" class="link-botao">Usar outro programa de e-mail</button>
+      </div>
+      <p id="status-salvar-continuar" class="status-captura"></p>
+    </div>
+
     <div class="janela-acoes">
       <button class="botao fechar-janela">Fechar</button>
     </div>
@@ -174,6 +213,7 @@
       <button class="botao fechar-janela">Fechar</button>
       <button id="btn-copiar-captura" class="botao">📋 Copiar imagem</button>
       <button id="btn-email-captura" class="botao">📧 Enviar por e-mail</button>
+      <button type="button" id="btn-email-captura-outro" class="link-botao">Não usa Gmail?</button>
       <button id="btn-compartilhar-captura" class="botao">Compartilhar…</button>
       <button id="btn-baixar-captura" class="botao botao-primario">Baixar imagem</button>
     </div>

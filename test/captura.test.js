@@ -73,6 +73,17 @@ testar("1 comando usa singular, não 'comandos'", function () {
   assert.ok(texto.indexOf("1 comando)") >= 0, "esperava '1 comando)', veio: " + texto);
 });
 
+testar("linkEmailGmail vai para o Gmail na web, com o mesmo conteúdo do mailto", function () {
+  const link = Captura.linkEmailGmail("professor@escola.edu.es.gov.br", fase, "Maria", null, "a.png");
+  assert.strictEqual(
+    link.indexOf("https://mail.google.com/mail/?view=cm&fs=1&to=professor%40escola.edu.es.gov.br"), 0,
+    "deveria começar com o endereço de compose do Gmail e o destinatário; veio: " + link
+  );
+  const texto = decodeURIComponent(link);
+  assert.ok(texto.indexOf("Fase " + fase.id) >= 0, "faltou o número da fase no link do Gmail");
+  assert.ok(texto.indexOf("Maria") >= 0, "faltou o nome do aluno no link do Gmail");
+});
+
 console.log("");
 if (falhas > 0) {
   console.error(falhas + " falha(s).");

@@ -271,20 +271,18 @@ const Captura = (function () {
   }
 
   /*
-   * Monta o link "mailto:" do botão Enviar por e-mail.
+   * Assunto e corpo do e-mail para o professor. Um mailto (e também o Gmail
+   * na web) NÃO consegue anexar arquivo — é um limite de segurança de todo
+   * navegador, não deste jogo. Por isso o corpo avisa que a imagem foi
+   * baixada e pede para anexá-la; quem chama isto (ui.js) é responsável por
+   * disparar o download antes de abrir o e-mail.
    *
-   * Um mailto NÃO consegue anexar arquivo — é um limite de segurança de todo
-   * navegador, não deste jogo. Por isso o corpo da mensagem avisa que a
-   * imagem foi baixada e pede para anexá-la; quem chama esta função (ui.js)
-   * é responsável por disparar o download antes de abrir o e-mail.
-   *
-   *   destino   — endereço do professor (EMAIL_PROFESSOR)
    *   fase      — fase atual
    *   aluno     — nome digitado, pode vir vazio
    *   resultado — { estrelas, usados } se a fase foi concluída, ou null
    *   arquivo   — nome do PNG que foi baixado (Captura.nomeArquivo)
    */
-  function linkEmail(destino, fase, aluno, resultado, arquivo) {
+  function partesEmail(fase, aluno, resultado, arquivo) {
     const situacao = resultado
       ? "Estrelas: " + "★".repeat(resultado.estrelas) + "☆".repeat(3 - resultado.estrelas) +
         " (" + resultado.usados + (resultado.usados === 1 ? " comando)" : " comandos)")
@@ -301,16 +299,40 @@ const Captura = (function () {
       "Anexe esse arquivo (pasta Downloads) antes de enviar este e-mail."
     ].join("\n");
 
+    return { assunto: assunto, corpo: corpo };
+  }
+
+  /*
+   * mailto: — funciona em qualquer navegador, mas só abre alguma coisa se
+   * houver um programa de e-mail configurado na máquina (Outlook, Mail...).
+   * Em muito PC de escola não há nenhum, e o clique não visivelmente faz
+   * nada — por isso ele é a opção "outro programa de e-mail", não a padrão.
+   */
+  function linkEmail(destino, fase, aluno, resultado, arquivo) {
+    const p = partesEmail(fase, aluno, resultado, arquivo);
     // O destinatário não é codificado: é só letras, pontos e "@", e alguns
     // clientes de e-mail leem melhor sem "%40" no meio do endereço.
     return "mailto:" + destino +
-      "?subject=" + encodeURIComponent(assunto) +
-      "&body=" + encodeURIComponent(corpo);
+      "?subject=" + encodeURIComponent(p.assunto) +
+      "&body=" + encodeURIComponent(p.corpo);
+  }
+
+  /*
+   * Gmail na web — abre o rascunho direto no navegador, sem depender de
+   * nenhum programa instalado. É a opção padrão porque bate com o
+   * ecossistema da escola (Chromebook, contas @...gov.br em Google
+   * Workspace); precisa de internet e de o aluno estar logado no Gmail.
+   */
+  function linkEmailGmail(destino, fase, aluno, resultado, arquivo) {
+    const p = partesEmail(fase, aluno, resultado, arquivo);
+    return "https://mail.google.com/mail/?view=cm&fs=1&to=" + encodeURIComponent(destino) +
+      "&su=" + encodeURIComponent(p.assunto) + "&body=" + encodeURIComponent(p.corpo);
   }
 
   return {
     gerar: gerar,
     nomeArquivo: nomeArquivo,
-    linkEmail: linkEmail
+    linkEmail: linkEmail,
+    linkEmailGmail: linkEmailGmail
   };
 })();

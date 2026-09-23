@@ -895,3 +895,43 @@ body.guia-recolhido .guia-aba { display: block; }
   color: #ffd447;
   font-weight: 700;
 }
+
+/* --------------------------------------------- continuar em outro PC -- */
+
+/* Botão que parece um link: usado para revelar um bloco opcional (código)
+ * ou como ação secundária, sem competir visualmente com o botão principal. */
+.link-botao {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #8fb3dd;
+  font-size: 13px;
+  font-family: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-botao:hover { color: #ffd447; }
+
+.alternativa-toggle { margin: 10px 0 0; }
+
+.bloco-codigo {
+  margin-top: 8px;
+  padding: 12px;
+  background: #101a29;
+  border: 1px dashed #3a5375;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bloco-salvar-depois {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #24354f;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bloco-salvar-depois .revisao-titulo { margin: 0; }
+.bloco-salvar-depois .linha-controles { align-items: center; }

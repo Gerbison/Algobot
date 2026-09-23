@@ -59,24 +59,32 @@ Na janela que abre, o aluno escolhe o destino:
 | Botão | O que faz | Quando aparece |
 |---|---|---|
 | **Baixar imagem** | salva o PNG na pasta Downloads | sempre |
-| **📧 Enviar por e-mail** | baixa a imagem e abre o e-mail do aluno já endereçado ao professor | sempre, em qualquer navegador — inclusive por duplo clique |
+| **📧 Enviar por e-mail** | baixa a imagem e abre o **Gmail na web** já endereçado ao professor | sempre, em qualquer navegador — inclusive por duplo clique |
+| *Não usa Gmail?* | a mesma coisa, mas abrindo o **programa de e-mail padrão** da máquina (Outlook etc.), em vez do Gmail | sempre |
 | **📋 Copiar imagem** | copia para colar com Ctrl+V (WhatsApp Web, Classroom, e-mail) | só no site publicado (https) |
 | **Compartilhar…** | abre o menu de compartilhar do sistema | só onde o navegador permite enviar arquivo (comum no celular) |
 
 Aberto por **duplo clique** no `index.html`, o navegador bloqueia copiar e o
-menu de compartilhar por segurança; ali só aparecem *Baixar* e *Enviar por
-e-mail*. No endereço do GitHub Pages os quatro funcionam, conforme o navegador.
+menu de compartilhar por segurança; ali só aparecem *Baixar* e os dois de
+e-mail. No endereço do GitHub Pages os cinco funcionam, conforme o navegador.
 
-**Sobre o "Enviar por e-mail":** ele abre o programa de e-mail do aluno (Gmail,
-Outlook, o app de e-mail do celular) já com o campo "para" preenchido com o
-endereço do professor, e assunto e corpo prontos com a fase, o nome do aluno e
-o resultado. **Não anexa o arquivo sozinho** — nenhum site consegue fazer isso
-por regra de segurança do navegador, não é uma limitação deste jogo. Por isso o
-botão baixa a imagem automaticamente antes de abrir o e-mail, e o corpo da
-mensagem lembra o aluno de anexá-la. Para outro professor usar o jogo, troque o
-endereço em `EMAIL_PROFESSOR`, no topo de `js/config.js`. Se o computador não
-tiver nenhum programa de e-mail configurado, nada abre — nesse caso use
-*Baixar imagem* e envie por outro canal.
+**Sobre o "Enviar por e-mail":** ele abre um rascunho já com o campo "para"
+preenchido com o endereço do professor, e assunto e corpo prontos com a fase, o
+nome do aluno e o resultado. **Não anexa o arquivo sozinho** — nenhum site
+consegue fazer isso por regra de segurança do navegador, não é uma limitação
+deste jogo. Por isso o botão baixa a imagem automaticamente antes de abrir o
+e-mail, e o corpo da mensagem lembra o aluno de anexá-la.
+
+O padrão é abrir o **Gmail na web**, porque isso funciona em qualquer
+computador com internet, sem depender de programa nenhum instalado — e bate
+com o que a escola já usa (Chromebook, conta @...gov.br em Google Workspace).
+`mailto:` (o link "Não usa Gmail?") só abre alguma coisa se houver um programa
+de e-mail configurado na máquina, e em muito PC de escola não há nenhum — foi
+por isso que o botão "parecia não funcionar" antes desta versão: a imagem
+baixava, mas nada mais acontecia, porque não existia com o quê abrir o mailto.
+
+Para outro professor usar o jogo, troque o endereço em `EMAIL_PROFESSOR`, no
+topo de `js/config.js`.
 
 O arquivo sai com um nome fácil de organizar quando você recebe vários:
 `algobot-fase-05-maria-luiza-2026-09-17.png`.
@@ -146,6 +154,41 @@ conquistadas. No rodapé dessa tela aparecem **"Jogador"** e **"Código"** — o
 nome digitado e o código de conclusão, os dois sempre visíveis, sem precisar
 abrir outra janela. É de propósito: quando o aluno tira um print dessa tela
 para mandar ao professor, dá para saber de quem é sem precisar perguntar.
+
+### Continuar em outro computador (sem banco de dados)
+
+O progresso mora no `localStorage`, e isso é por navegador e por computador —
+ver [Quando der problema](#quando-der-problema). Para um aluno que joga em
+máquinas diferentes (o do laboratório hoje, outro amanhã), o jogo tem um jeito
+de levar o progresso junto sem depender de conta, login ou servidor: o próprio
+**código de conclusão** (`ALG-XXXXX-XXXX`) carrega tudo — quais fases foram
+concluídas e com quantas estrelas.
+
+**Para guardar o progresso:** botão **Meu código** no cabeçalho → **💾 Salvar e
+continuar depois**. Digite o seu e-mail (uma vez só; o jogo lembra dele naquele
+computador para a próxima) e o jogo manda para você mesmo um e-mail com o
+código e as instruções. Funciona pelo Gmail na web por padrão, com "Usar outro
+programa de e-mail" como alternativa — mesma lógica do botão de captura.
+
+**Para continuar em outro computador**, há dois caminhos, conforme o momento:
+
+- **Máquina nova** (tela de boas-vindas, nome ainda não digitado): clique em
+  **"Já jogou em outro computador?"**, digite o nome do mesmo jeito de antes e
+  cole o código.
+- **Já está jogando** e quer trazer progresso de outro lugar: botão **Fases** →
+  **📥 Importar código de outro computador**, sem precisar redigitar o nome
+  (já é o que está salvo nesta máquina).
+
+Os dois caminhos levam ao mesmo lugar: o código só é aceito se o **nome bater**
+com o de quando ele foi gerado (maiúscula, minúscula e acento não importam,
+mas "Maria" e "João" continuam sendo pessoas diferentes) — é isso que impede um
+aluno de usar o código do colega para pular fases. Importar nunca faz perder
+progresso: cada fase fica com o **melhor resultado** entre o que já estava
+naquele computador e o que veio no código.
+
+**O que o código não guarda:** o menor número de comandos de cada fase (só as
+estrelas) e a data. Isso não afeta o jogo — só o "melhor resultado" que
+aparece internamente, sem tela nenhuma mostrando esse número hoje.
 
 ## As fases
 
